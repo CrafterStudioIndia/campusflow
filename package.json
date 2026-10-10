@@ -1,0 +1,26 @@
+{
+  "name": "campusflow",
+  "version": "1.0.0",
+  "description": "CampusFlow - Automated School Finance & Academic Intelligence",
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/reseed.js",
+    "ai:probe": "node scripts/ai-probe.js",
+    "test": "node scripts/check.js && node scripts/provider-test.js && node scripts/smoke-test.js && node scripts/auth-test.js",
+    "test:provider": "node scripts/provider-test.js",
+    "test:api": "node scripts/smoke-test.js",
+    "test:auth": "node scripts/auth-test.js",
+    "check": "node scripts/check.js"
+  },
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "better-sqlite3": "^12.4.1",
+    "express": "^5.1.0"
+  }
+}

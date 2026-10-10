@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CampusFlow — Finance &amp; Academic Intelligence</title>
+<style>
+  :root {
+    --bg:        #0a0c10;
+    --surface:   #11141b;
+    --surface-2: #171b24;
+    --line:      #232936;
+    --line-soft: #1b2029;
+
+    --text:      #eef1f6;
+    --muted:     #99a2b3;
+    --faint:     #6b7486;
+
+    --accent:    #5b8cff;
+    --ok:        #34d399;
+    --warn:      #fbbf24;
+    --danger:    #f87171;
+    --crit:      #fb7185;
+
+    /* Extra hues, so sections and roles read as distinct areas at a glance
+       rather than every panel looking like the same grey card. */
+    --violet:    #a78bfa;
+    --cyan:      #22d3ee;
+    --teal:      #2dd4bf;
+    --pink:      #f472b6;
+    --orange:    #fb923c;
+    --lime:      #a3e635;
+
+    --c-finance: var(--ok);
+    --c-teacher: var(--accent);
+    --c-student: var(--violet);
+
+    --r-sm: 8px;
+    --r:    14px;
+
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, system-ui, sans-serif;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    --glow: 0 6px 22px -6px currentColor;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(900px 500px at 10% -10%, rgba(91,140,255,.16), transparent 60%),
+      radial-gradient(820px 480px at 44% -6%, rgba(167,139,250,.13), transparent 62%),
+      radial-gradient(800px 480px at 92% 2%, rgba(45,212,191,.11), transparent 62%),
+      radial-gradient(700px 420px at 60% 100%, rgba(244,114,182,.07), transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .shell { position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; padding: 28px 22px 80px; }
+
+  /* ---------------- Header ---------------- */
+
+  header.top {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; margin-bottom: 26px;
+  }
+
+  .brand { display: flex; align-items: center; gap: 13px; }
+  .brand-mark {
+    width: 40px; height: 40px; border-radius: 11px; flex: none;
+    background: linear-gradient(145deg, var(--accent), #7c5cff);
+    display: grid; place-items: center; font-weight: 800; font-size: 17px;
+    color: #fff; box-shadow: 0 4px 14px rgba(91,140,255,.35);
+  }
+  .brand h1 { font-size: 19px; font-weight: 650; letter-spacing: -.02em; }
+  .brand p  { font-size: 12.5px; color: var(--faint); margin-top: -2px; }
+
+  .top-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .ai-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 11.5px; font-family: var(--mono);
+    padding: 6px 11px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    color: var(--muted); max-width: 100%;
+  }
+  .ai-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); flex: none; }
+  .ai-chip.live .dot { background: var(--ok); box-shadow: 0 0 0 3px rgba(52,211,153,.16); }
+  .ai-chip.offline .dot { background: var(--warn); box-shadow: 0 0 0 3px rgba(251,191,36,.16); }
+
+  .who {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 12px 6px 7px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--line);
+  }
+  .avatar {
+    width: 26px; height: 26px; border-radius: 50%; flex: none;
+    background: var(--surface); border: 1px solid var(--line);
+    display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--accent);
+  }
+  .who-meta { line-height: 1.25; }
+  .who-meta b { display: block; font-size: 12.5px; font-weight: 600; }
+  .who-meta span { font-size: 10.5px; color: var(--faint); font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+
+  /* ---------------- Role switcher ---------------- */
+
+  .switcher {
+    display: flex; gap: 5px; padding: 5px; margin-bottom: 22px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r); box-shadow: var(--shadow);
+    position: sticky; top: 12px; z-index: 20; backdrop-filter: blur(8px);
+  }
+  .switcher button {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 9px;
+    padding: 11px 14px; border: 0; border-radius: 10px; cursor: pointer;
+    background: transparent; color: var(--muted);
+    font-family: var(--sans); font-size: 14px; font-weight: 550;
+    transition: background .16s, color .16s;
+  }
+  .switcher button:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+  .switcher button[aria-pressed="true"] { color: #fff; }
+  .switcher button[aria-pressed="true"][data-role="ACCOUNTANT"] {
+    background: linear-gradient(135deg, #10b981, #34d399); box-shadow: var(--glow); color: var(--ok);
+  }
+  .switcher button[aria-pressed="true"][data-role="TEACHER"] {
+    background: linear-gradient(135deg, #3b6ef0, #6d8bff); box-shadow: var(--glow); color: #fff;
+  }
+  .switcher button[aria-pressed="true"][data-role="STUDENT"] {
+    background: linear-gradient(135deg, #8b5cf6, #c084fc); box-shadow: var(--glow); color: #fff;
+  }
+  .switcher button:disabled { opacity: .45; cursor: not-allowed; }
+  .switcher .ico { font-size: 15px; line-height: 1; }
+  .switcher .kbd {
+    font-family: var(--mono); font-size: 10px; padding: 1px 5px; border-radius: 4px;
+    background: rgba(255,255,255,.1); color: inherit; opacity: .75;
+  }
+  .switcher button[aria-pressed="true"] .kbd { background: rgba(0,0,0,.22); }
+
+  /* ---------------- Cards ---------------- */
+
+  .grid { display: grid; gap: 16px; }
+  .grid.stats { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin-bottom: 16px; }
+  .grid.two   { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r); padding: 20px; box-shadow: var(--shadow);
+  }
+  .card.pad-lg { padding: 24px; }
+  /* A colour wash + bar on the top edge, so a stack of cards scans as a set of
+     distinct topics instead of one long grey wall. */
+  .card.tinted { position: relative; overflow: hidden; }
+  .card.tinted::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+    background: linear-gradient(90deg, var(--tint, var(--accent)), transparent 78%);
+  }
+  .card.tinted > * { position: relative; }
+
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+  .card-title { font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+  .card-sub   { font-size: 13px; color: var(--faint); margin-top: 3px; }
+
+  .stat { position: relative; overflow: hidden; }
+  .stat::after {
+    content: ""; position: absolute; right: -28px; top: -28px;
+    width: 96px; height: 96px; border-radius: 50%;
+    background: var(--tint, var(--accent)); opacity: .12; filter: blur(6px);
+  }
+  .stat .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); font-weight: 600; }
+  .stat .value { font-size: 27px; font-weight: 680; letter-spacing: -.025em; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .stat .foot  { font-size: 12px; color: var(--muted); margin-top: 5px; }
+  .stat .foot b { color: var(--text); font-weight: 600; }
+  .stat.accent .value { color: var(--accent); }
+  .stat.danger .value { color: var(--danger); }
+  .stat.ok .value     { color: var(--ok); }
+  .stat.warn .value   { color: var(--warn); }
+  .stat.violet .value { color: var(--violet); }
+  .stat.cyan .value   { color: var(--cyan); }
+  .stat.pink .value   { color: var(--pink); }
+
+  .risk-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .dial { position: relative; width: 132px; height: 132px; flex: none; }
+  .dial svg { transform: rotate(-90deg); display: block; }
+  .dial .track { stroke: var(--line); }
+  .dial .fill  { transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1), stroke .3s; }
+  .dial-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .dial-center .n { font-size: 34px; font-weight: 720; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .dial-center .u { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); margin-top: 4px; font-weight: 600; }
+  .dial-center .s { font-size: 10.5px; margin-top: 3px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+
+  .sev-healthy  { color: var(--ok); }
+  .sev-guarded  { color: var(--accent); }
+  .sev-elevated { color: var(--warn); }
+  .sev-critical { color: var(--crit); }
+
+  .bg-healthy  { background: rgba(52,211,153,.10); border-color: rgba(52,211,153,.28); }
+  .bg-guarded  { background: rgba(91,140,255,.10); border-color: rgba(91,140,255,.28); }
+  .bg-elevated { background: rgba(251,191,36,.10); border-color: rgba(251,191,36,.28); }
+  .bg-critical { background: rgba(251,113,133,.10); border-color: rgba(251,113,133,.30); }
+
+  .banner {
+    display: flex; gap: 13px; align-items: flex-start;
+    padding: 15px 17px; border-radius: var(--r-sm);
+    border: 1px solid var(--line); background: var(--surface-2);
+  }
+  .banner .ico { font-size: 18px; line-height: 1.2; flex: none; }
+  .banner h4 { font-size: 14.5px; font-weight: 650; margin-bottom: 4px; }
+  .banner p  { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .item {
+    background: var(--surface-2); border: 1px solid var(--line-soft);
+    border-radius: var(--r-sm); padding: 14px 16px;
+    border-left: 3px solid var(--line);
+  }
+  .item.sev-healthy  { border-left-color: var(--ok); }
+  .item.sev-guarded  { border-left-color: var(--accent); }
+  .item.sev-elevated { border-left-color: var(--warn); }
+  .item.sev-critical { border-left-color: var(--crit); }
+
+  .item-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .item-title { font-size: 14.5px; font-weight: 620; }
+  .item-body { font-size: 13.5px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+  .item-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: 11.5px; align-items: center; }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--line); color: var(--muted);
+    font-family: var(--mono); letter-spacing: .01em; white-space: nowrap;
+  }
+  .tag.num { font-variant-numeric: tabular-nums; }
+  .p-critical { color: var(--crit); border-color: rgba(251,113,133,.35); background: rgba(251,113,133,.10); }
+  .p-high     { color: var(--warn); border-color: rgba(251,191,36,.32); background: rgba(251,191,36,.10); }
+  .p-medium   { color: var(--accent); border-color: rgba(91,140,255,.30); background: rgba(91,140,255,.09); }
+  .p-low      { color: var(--faint); }
+
+  .table-wrap { overflow-x: auto; margin: 0 -20px; padding: 0 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--faint); font-weight: 650; padding: 0 14px 10px 0; white-space: nowrap;
+    border-bottom: 1px solid var(--line);
+  }
+  td { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr.clickable { cursor: pointer; transition: background .12s; }
+  tbody tr.clickable:hover { background: var(--surface-2); }
+  tbody tr.active { background: rgba(91,140,255,.09); }
+  .num { text-align: right; }
+
+  .bar { height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; min-width: 60px; }
+  .bar > i { display: block; height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  select {
+    font-family: var(--sans); font-size: 13.5px; padding: 9px 13px;
+    background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--line); border-radius: var(--r-sm); cursor: pointer;
+  }
+  select:hover { border-color: #2f3746; }
+  .spacer { flex: 1; }
+
+  .progress { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; }
+  .progress > i {
+    display: block; height: 100%; border-radius: 5px;
+    background: linear-gradient(90deg, var(--ok), #22c98a);
+    transition: width .7s cubic-bezier(.4,0,.2,1);
+  }
+  .progress.partial > i { background: linear-gradient(90deg, var(--warn), #f59e0b); }
+  .progress.empty > i   { background: linear-gradient(90deg, var(--crit), #f43f5e); }
+
+  .bd-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line-soft); }
+  .bd-row:last-child { border-bottom: 0; }
+  .bd-row .lbl { display: flex; align-items: center; gap: 10px; font-size: 14px; min-width: 0; }
+  .bd-row .swatch { width: 9px; height: 9px; border-radius: 2.5px; flex: none; }
+  .bd-row .amt { font-size: 15px; font-weight: 620; font-variant-numeric: tabular-nums; text-align: right; }
+
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 14px; padding-bottom: 16px; position: relative; }
+  .step:not(:last-child)::before {
+    content: ""; position: absolute; left: 13px; top: 30px; bottom: 0; width: 1px; background: var(--line);
+  }
+  .step .num-badge {
+    width: 27px; height: 27px; border-radius: 50%; flex: none; z-index: 1;
+    background: var(--surface-2); border: 1px solid var(--line);
+    display: grid; place-items: center; font-size: 11.5px; font-weight: 700; color: var(--accent);
+    font-family: var(--mono);
+  }
+  .step.critical .num-badge { color: var(--crit); border-color: rgba(251,113,133,.4); }
+  .step.high .num-badge     { color: var(--warn); border-color: rgba(251,191,36,.4); }
+  .step-body { padding-top: 3px; min-width: 0; }
+  .step-body h5 { font-size: 14px; font-weight: 600; line-height: 1.45; }
+  .step-meta { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
+
+  .plan-group { margin-bottom: 16px; }
+  .plan-group:last-child { margin-bottom: 0; }
+  .plan-group h6 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint);
+    font-weight: 650; margin-bottom: 8px;
+  }
+  .chk { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--muted); padding: 4px 0; line-height: 1.55; }
+  .chk::before { content: "→"; color: var(--accent); flex: none; font-weight: 700; }
+
+  .muted { color: var(--muted); }
+  .faint { color: var(--faint); }
+  .mono  { font-family: var(--mono); }
+
+  /* ---------------- Buttons ---------------- */
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    padding: 8px 13px; border-radius: var(--r-sm); cursor: pointer;
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+    transition: border-color .16s, background .16s, color .16s;
+    white-space: nowrap;
+  }
+  .btn:hover:not(:disabled) { border-color: #2f3746; background: #171c25; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover:not(:disabled) { background: #4a7bf0; border-color: #4a7bf0; }
+  .btn.ghost { background: transparent; }
+  .btn.danger { color: var(--crit); border-color: rgba(251,113,133,.35); }
+  .btn.sm { font-size: 12px; padding: 5px 10px; }
+
+  input[type="text"], input[type="date"], input[type="search"] {
+    font-family: var(--sans); font-size: 13.5px; padding: 9px 13px;
+    background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--line); border-radius: var(--r-sm);
+  }
+  input::placeholder { color: var(--faint); }
+  label.field { display: inline-flex; flex-direction: column; gap: 5px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .07em; font-weight: 650; color: var(--faint); }
+
+  /* ---------------- Segmented tabs ---------------- */
+
+  .seg { display: inline-flex; gap: 3px; padding: 3px; background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: var(--r-sm); }
+  .seg button {
+    font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 7px 14px;
+    border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .seg button:hover { color: var(--text); }
+  .seg button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+  /* ---------------- Notification bell + panel ---------------- */
+
+  .icon-btn {
+    position: relative; width: 34px; height: 34px; flex: none;
+    display: grid; place-items: center; border-radius: 50%;
+    background: var(--surface-2); border: 1px solid var(--line);
+    color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1;
+  }
+  .icon-btn:hover { color: var(--text); border-color: #2f3746; }
+  .icon-btn .badge {
+    position: absolute; top: -3px; right: -3px; min-width: 16px; height: 16px;
+    padding: 0 4px; border-radius: 8px; background: var(--crit); color: #fff;
+    font-size: 9.5px; font-weight: 700; font-family: var(--mono);
+    display: grid; place-items: center; border: 2px solid var(--bg);
+  }
+
+  .drawer {
+    position: absolute; right: 0; top: calc(100% + 10px); width: min(420px, calc(100vw - 44px));
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
+    box-shadow: 0 18px 48px rgba(0,0,0,.55); z-index: 60; overflow: hidden;
+  }
+  .drawer-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+    border-bottom: 1px solid var(--line); }
+  .drawer-body { max-height: min(60vh, 460px); overflow-y: auto; }
+  .drawer-foot { padding: 10px 16px; border-top: 1px solid var(--line); display: flex; gap: 8px; align-items: center; }
+
+  .nitem { display: block; width: 100%; text-align: left; padding: 13px 16px;
+    border: 0; border-bottom: 1px solid var(--line-soft); background: transparent;
+    cursor: pointer; color: inherit; font: inherit; }
+  .nitem:hover { background: var(--surface-2); }
+  .nitem.unread { background: rgba(91,140,255,.06); }
+  .nitem.unread .nitem-title::before {
+    content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); margin-right: 7px; vertical-align: middle;
+  }
+  .nitem-top { display: flex; align-items: baseline; gap: 8px; justify-content: space-between; }
+  .nitem-title { font-size: 13.5px; font-weight: 600; }
+  .nitem-time { font-size: 10.5px; color: var(--faint); font-family: var(--mono); flex: none; }
+  .nitem-body { font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.55; }
+
+  .chip {
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px;
+    font-size: 10px; font-weight: 650; text-transform: uppercase; letter-spacing: .06em;
+    font-family: var(--mono); border: 1px solid var(--line); color: var(--faint); flex: none;
+  }
+  .chip.fee         { color: var(--warn); border-color: rgba(251,191,36,.35); }
+  .chip.attendance  { color: var(--accent); border-color: rgba(91,140,255,.32); }
+  .chip.risk        { color: var(--crit); border-color: rgba(251,113,133,.35); }
+  .chip.instalment  { color: var(--warn); border-color: rgba(251,191,36,.3); }
+  .chip.welcome     { color: var(--ok); border-color: rgba(52,211,153,.32); }
+
+  .rel { position: relative; }
+  .pager { display: flex; align-items: center; gap: 10px; justify-content: flex-end;
+    font-size: 12.5px; color: var(--faint); padding-top: 12px; }
+
+  .attstrip { display: flex; gap: 3px; flex-wrap: wrap; }
+  .attstrip i {
+    width: 13px; height: 18px; border-radius: 3px; display: block;
+    background: var(--line); position: relative;
+  }
+  .attstrip i.present { background: var(--ok); }
+  .attstrip i.late    { background: var(--warn); }
+  .attstrip i.absent  { background: var(--crit); }
+  .attstrip i.excused { background: var(--accent); opacity: .55; }
+
+  .daychips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .daychips span {
+    font-size: 10px; font-family: var(--mono); padding: 2px 5px; border-radius: 4px;
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--faint);
+  }
+  .daychips span.present { color: var(--ok); border-color: rgba(52,211,153,.3); }
+  .daychips span.absent  { color: var(--crit); border-color: rgba(251,113,133,.3); }
+  .daychips span.late    { color: var(--warn); border-color: rgba(251,191,36,.3); }
+  .mt-16 { margin-top: 16px; }
+  .empty { text-align: center; padding: 44px 20px; color: var(--faint); font-size: 14px; }
+
+  /* ---------------- Roll call ---------------- */
+
+  .tallybar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tally {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 13px; border-radius: 999px; cursor: pointer;
+    background: var(--surface-2); border: 1px solid var(--line);
+    font-size: 12.5px; font-weight: 600; color: var(--muted);
+    transition: border-color .14s, background .14s, color .14s;
+  }
+  .tally .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--tone, var(--faint)); flex: none; }
+  .tally b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .tally:hover { color: var(--text); border-color: var(--tone, var(--line)); }
+  .tally[data-paint] { color: var(--tone); border-color: var(--tone); background: color-mix(in srgb, var(--tone) 12%, transparent); }
+
+  .rollcall {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+  .rcard {
+    position: relative; display: flex; flex-direction: column; gap: 6px;
+    width: 100%; text-align: left; cursor: pointer;
+    padding: 12px 13px 11px 16px; border-radius: var(--r-sm);
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-left: 3px solid var(--tone, var(--line));
+    color: inherit; font: inherit;
+    transition: transform .12s, border-color .14s, background .14s;
+  }
+  .rcard:hover { transform: translateY(-1px); border-color: var(--tone, var(--line)); }
+  .rcard:focus-visible { outline: 2px solid var(--tone, var(--accent)); outline-offset: 2px; }
+  .rcard .rc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .rcard .rc-name { font-size: 13.5px; font-weight: 620; line-height: 1.35; min-width: 0; overflow-wrap: anywhere; }
+  .rcard .rc-meta {
+    font-family: var(--mono); font-size: 10.5px; color: var(--faint);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .rcard .rc-state {
+    display: inline-flex; align-items: center; gap: 5px; flex: none;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    padding: 2px 7px; border-radius: 999px;
+    background: color-mix(in srgb, var(--tone, var(--faint)) 18%, transparent);
+    color: var(--tone, var(--faint));
+  }
+  .rcard .rc-bar { height: 3px; border-radius: 2px; background: var(--tone, var(--line)); opacity: .55; }
+  .rcard.dirty { box-shadow: inset 0 0 0 1px var(--tone, var(--accent)); }
+  .rcard[data-status="present"] { --tone: var(--ok); }
+  .rcard[data-status="late"]    { --tone: var(--warn); }
+  .rcard[data-status="absent"]  { --tone: var(--crit); }
+  .rcard[data-status="excused"] { --tone: var(--cyan); }
+  .rcard[data-status=""]        { --tone: var(--faint); }
+
+  .savebar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-soft);
+  }
+  .savebar .spacer { flex: 1; }
+
+  /* ---------------- Small shared utilities ---------------- */
+
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .hline { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .kv { display: flex; align-items: center; gap: 9px; }
+  .sub { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+  .gap-b { margin-bottom: 16px; }
+  .hide-sm { display: initial; }
+
+  .skeleton { position: relative; overflow: hidden; background: var(--surface-2); border-radius: var(--r-sm); }
+  .skeleton::after {
+    content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.045), transparent);
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 100;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-left: 3px solid var(--danger);
+    border-radius: var(--r-sm); padding: 14px 18px; max-width: 380px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
+    animation: slidein .22s cubic-bezier(.4,0,.2,1);
+  }
+  .toast h6 { font-size: 13.5px; font-weight: 650; margin-bottom: 3px; }
+  .toast p  { font-size: 12.5px; color: var(--muted); }
+  @keyframes slidein { from { opacity: 0; transform: translateX(20px); } }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 640px) {
+    .shell { padding: 18px 14px 60px; }
+    .switcher { flex-direction: column; position: static; }
+    .switcher button { justify-content: flex-start; }
+    .stat .value { font-size: 23px; }
+    .card { padding: 16px; }
+    .table-wrap { margin: 0 -16px; padding: 0 16px; }
+    header.top { gap: 12px; }
+    .rollcall { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark">CF</div>
+      <div>
+        <h1>CampusFlow</h1>
+        <p>Automated School Finance &amp; Academic Intelligence</p>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="ai-chip" id="aiChip" title="AI provider status">
+        <span class="dot"></span><span id="aiText">connecting&hellip;</span>
+      </div>
+      <div class="who" id="who" hidden>
+        <div class="avatar" id="whoAvatar">&mdash;</div>
+        <div class="who-meta"><b id="whoName">&mdash;</b><span id="whoRole">&mdash;</span></div>
+      </div>
+      <div class="rel" id="bellHost">
+        <button type="button" class="icon-btn" id="bell" aria-label="Notifications" aria-expanded="false" hidden>
+          &#9993;<span class="badge" id="bellBadge" hidden>0</span>
+        </button>
+        <div class="drawer" id="bellPanel" hidden></div>
+      </div>
+      <button type="button" class="btn sm ghost" id="signOut" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <nav class="switcher" id="switcher" aria-label="Role switcher">
+    <button type="button" data-role="ACCOUNTANT" aria-pressed="false">
+      <span class="ico">&#9670;</span> Finance <span class="kbd">1</span>
+    </button>
+    <button type="button" data-role="TEACHER" aria-pressed="false">
+      <span class="ico">&#9670;</span> Teacher <span class="kbd">2</span>
+    </button>
+    <button type="button" data-role="STUDENT" aria-pressed="false">
+      <span class="ico">&#9670;</span> Student <span class="kbd">3</span>
+    </button>
+  </nav>
+
+  <main id="view">
+    <div class="grid stats">
+      <div class="card skeleton" style="height:104px"></div>
+      <div class="card skeleton" style="height:104px"></div>
+      <div class="card skeleton" style="height:104px"></div>
+      <div class="card skeleton" style="height:104px"></div>
+    </div>
+  </main>
+
+</div>
+<script>
+(() => {
+  'use strict';
+
+  /* ================= state ================= */
+
+const state = {
+    role: null,
+    token: null,
+    user: null,
+    csrf: null,
+    grade: 9,
+    selectedStudent: null,
+    tab: 'overview',
+    /* Teacher screen is split so no single tab is a five-card tower. */
+    ttab: 'roster',
+    /* Register being edited: which day, the sheet it came from, and unflipped marks. */
+    attendance: { day: '', today: '', sheet: null, draft: {}, saved: {}, busy: false },
+    ledger: { q: '', method: '', from: '', to: '', page: 1, pageSize: 15, views: [], activeView: '' },
+    unread: 0,
+  };
+
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const view = $('#view');
+
+  const VIEWS_KEY = 'campusflow.ledgerViews';
+
+  const loadViews = () => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(VIEWS_KEY) || '[]');
+      return Array.isArray(raw) ? raw.slice(0, 12) : [];
+    } catch { return []; }
+  };
+
+  const saveViews = () => {
+    try { localStorage.setItem(VIEWS_KEY, JSON.stringify(state.ledger.views)); } catch { /* private mode */ }
+  };
+
+  /* ================= helpers ================= */
+
+  const esc = (v) => String(v ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  const inr = (n) => '₹' + Math.round(Number(n) || 0).toLocaleString('en-IN');
+
+  const inrShort = (n) => {
+    const v = Math.abs(Number(n) || 0);
+    if (v >= 1e7) return '₹' + (v / 1e7).toFixed(2) + ' Cr';
+    if (v >= 1e5) return '₹' + (v / 1e5).toFixed(2) + ' L';
+    if (v >= 1e3) return '₹' + (v / 1e3).toFixed(1) + 'K';
+    return '₹' + Math.round(v).toLocaleString('en-IN');
+  };
+
+  const pct = (n) => (Number(n) || 0).toFixed(1) + '%';
+  const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, Number(n) || 0));
+  const sev = (s) => String(s || 'healthy').toLowerCase();
+
+  /**
+   * Fee statuses are not risk severities, so they cannot borrow `sev()`'s colour
+   * scale — `settled` and `overdue` would both fall through to the default.
+   * Map the invoice and instalment vocabularies onto the four that exist.
+   */
+  const FEE_SEV = {
+    settled: 'healthy', paid: 'healthy', waived: 'healthy', void: 'guarded',
+    open: 'guarded', pending: 'guarded', partial: 'elevated',
+    overdue: 'critical', overdue_high: 'critical', due: 'elevated',
+  };
+  const feeSev = (s) => FEE_SEV[String(s || '').toLowerCase()] || 'guarded';
+
+  const SEV_COLOR = {
+    healthy: 'var(--ok)', guarded: 'var(--accent)',
+    elevated: 'var(--warn)', critical: 'var(--crit)',
+  };
+  const SEV_ICON = {
+    healthy: '●', guarded: '●', elevated: '▲', critical: '■',
+  };
+
+  const colorForRate = (n) => {
+    const t = clamp(n, 0, 100);
+    if (t < 50) return 'var(--crit)';
+    if (t < 78) return 'var(--warn)';
+    return 'var(--ok)';
+  };
+
+  /* ================= register vocabulary ================= */
+
+  /** Cycle order for click-to-mark: an unmarked student becomes present first. */
+  const ATT_STATES = ['present', 'late', 'absent', 'excused'];
+  const ATT_META = {
+    present: { label: 'Present', icon: '✓', tone: 'var(--ok)', key: 'p' },
+    late: { label: 'Late', icon: '◔', tone: 'var(--warn)', key: 'l' },
+    absent: { label: 'Absent', icon: '✕', tone: 'var(--crit)', key: 'a' },
+    excused: { label: 'Excused', icon: '◌', tone: 'var(--cyan)', key: 'e' },
+  };
+  const attMeta = (s) => ATT_META[s] || { label: 'Unmarked', icon: '•', tone: 'var(--faint)', key: '' };
+  const nextStatus = (s) => {
+    const i = ATT_STATES.indexOf(s);
+    return i === -1 ? ATT_STATES[0] : ATT_STATES[(i + 1) % ATT_STATES.length];
+  };
+  const statusForKey = (k) => (ATT_STATES.find((s) => ATT_META[s].key === k) || null);
+
+  /** Local YYYY-MM-DD — the shape the `day` column and the date input both use. */
+  const isoDay = (d) => {
+    const pad = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  };
+  const shiftDay = (day, delta) => {
+    const d = new Date(day + 'T12:00:00');
+    if (Number.isNaN(d.getTime())) return day;
+    d.setDate(d.getDate() + delta);
+    return isoDay(d);
+  };
+  const prettyDay = (day) => {
+    const d = new Date(day + 'T12:00:00');
+    if (Number.isNaN(d.getTime())) return day;
+    return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+  };
+  const weekdayOf = (day) => {
+    const d = new Date(day + 'T12:00:00');
+    return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-IN', { weekday: 'long' });
+  };
+
+  function toast(title, msg) {
+    $$('.toast').forEach((t) => t.remove());
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = '<h6>' + esc(title) + '</h6><p>' + esc(msg) + '</p>';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 6000);
+  }
+
+  const SAFE = ['GET', 'HEAD', 'OPTIONS'];
+
+  /**
+   * Fetch wrapper for the dashboard.
+   *
+   * Credentials ride in two places: the in-memory access token (fast, and what
+   * scripts use) and an HttpOnly session cookie (survives a reload, invisible
+   * to JS). Unsafe verbs additionally echo the CSRF token the server issued,
+   * because a cookie is sent automatically and a cross-site POST would
+   * otherwise look like a real one. One silent refresh-and-retry on 401 keeps
+   * an 8-hour shift from asking anyone to sign in again.
+   */
+  async function api(path, opts, isRetry) {
+    opts = opts || {};
+    const method = (opts.method || 'GET').toUpperCase();
+    const headers = Object.assign({}, opts.headers || {});
+    if (opts.body) headers['content-type'] = 'application/json';
+    if (state.token) headers['authorization'] = 'Bearer ' + state.token;
+    if (state.csrf && !SAFE.includes(method)) headers['x-csrf-token'] = state.csrf;
+
+    let res;
+    try {
+      res = await fetch(path, Object.assign({}, opts, { headers, credentials: 'same-origin' }));
+    } catch {
+      throw new Error('Network error — is the server running on port 3000?');
+    }
+
+    let data = null;
+    try { data = await res.json(); } catch { /* non-JSON body */ }
+
+    if (res.status === 401 && !isRetry && !path.startsWith('/api/auth/')) {
+      if (await refreshSession()) {
+        return api(path, opts, true);
+      }
+    }
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        state.token = null;
+        state.user = null;
+        state.role = null;
+        state.csrf = null;
+        renderWho();
+        $$('#switcher button').forEach((b) => { b.disabled = false; });
+      }
+      const err = new Error((data && data.message) || ('Request failed (' + res.status + ')'));
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  /** Trade the refresh cookie for a new access token. Silent, once per call. */
+  async function refreshSession() {
+    let res;
+    try {
+      res = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'same-origin' });
+    } catch {
+      return false;
+    }
+    if (!res.ok) return false;
+    const data = await res.json().catch(() => null);
+    if (!data || !data.token) return false;
+    state.token = data.token;
+    state.csrf = data.csrfToken || null;
+    return true;
+  }
+
+  /** Adopt an already-valid cookie session on page load. */
+  async function adoptSession() {
+    try {
+      const res = await fetch('/api/auth/session', { credentials: 'same-origin' });
+      if (!res.ok) return false;
+      const data = await res.json();
+      state.user = data.user;
+      state.role = data.user.role;
+      state.csrf = data.csrfToken || null;
+      state.unread = data.unread || 0;
+      renderWho();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function signOut() {
+    try { await api('/api/auth/logout', { method: 'POST' }); } catch { /* already gone */ }
+    state.token = null;
+    state.user = null;
+    state.role = null;
+    state.csrf = null;
+    state.unread = 0;
+    state.tab = 'overview';
+    state.selectedStudent = null;
+    closeBell();
+    renderWho();
+    view.innerHTML = emptyState('Signed out. Pick a role above to sign back in.');
+  }
+
+  /* ================= notifications ================= */
+
+  const ago = (iso) => {
+    const then = Date.parse(iso);
+    if (!then) return '';
+    const mins = Math.max(0, Math.round((Date.now() - then) / 60000));
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.round(hrs / 24);
+    return days < 30 ? days + 'd ago' : new Date(then).toLocaleDateString('en-IN');
+  };
+
+  function renderBadge() {
+    const badge = $('#bellBadge');
+    badge.hidden = state.unread <= 0;
+    badge.textContent = state.unread > 99 ? '99+' : String(state.unread);
+  }
+
+  function closeBell() {
+    const panel = $('#bellPanel');
+    if (panel) panel.hidden = true;
+    const btn = $('#bell');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
+  function notificationItem(n) {
+    const link = n.link ? n.link : '';
+    return '<button type="button" class="nitem' + (n.read_at ? '' : ' unread') + '" data-notif="' + esc(n.id) + '"' +
+      (link ? ' data-link="' + esc(link) + '"' : '') + '>' +
+      '<div class="nitem-top">' +
+        '<span class="nitem-title">' + esc(n.title) + '</span>' +
+        '<span class="nitem-time">' + esc(ago(n.created_at)) + '</span>' +
+      '</div>' +
+      (n.body ? '<div class="nitem-body">' + esc(n.body) + '</div>' : '') +
+      '<div class="item-meta">' +
+        '<span class="chip ' + esc(n.kind || 'welcome') + '">' + esc(n.kind || 'notice') + '</span>' +
+        (link ? '<span class="tag">' + esc(link) + '</span>' : '') +
+      '</div></button>';
+  }
+
+  async function openBell() {
+    const panel = $('#bellPanel');
+    panel.hidden = false;
+    $('#bell').setAttribute('aria-expanded', 'true');
+    panel.innerHTML = '<div class="drawer-body"><div class="empty">loading&hellip;</div></div>';
+    try {
+      const d = await api('/api/notifications?limit=25');
+      state.unread = d.unread || 0;
+      renderBadge();
+      const list = d.notifications || [];
+      panel.innerHTML = '' +
+        '<div class="drawer-head">' +
+          '<div><div class="card-title">Alerts</div>' +
+            '<div class="card-sub">' + (state.unread ? state.unread + ' unread' : 'all caught up') + '</div></div>' +
+          '<div class="spacer"></div>' +
+          '<button type="button" class="btn sm ghost" id="markAll">Mark all read</button>' +
+        '</div>' +
+        '<div class="drawer-body">' +
+          (list.length ? list.map(notificationItem).join('') : '<div class="empty">No alerts yet</div>') +
+        '</div>' +
+        (state.role === 'ACCOUNTANT'
+          ? '<div class="drawer-foot"><button type="button" class="btn sm" id="genAlerts">Run alert sweep</button>' +
+            '<span class="faint" style="font-size:11.5px">Derives fresh alerts from live data</span></div>'
+          : '');
+    } catch (err) {
+      panel.innerHTML = '<div class="drawer-body"><div class="empty">' + esc(err.message) + '</div></div>';
+    }
+  }
+
+  async function markRead(id) {
+    try {
+      await api('/api/notifications/' + encodeURIComponent(id) + '/read', { method: 'POST' });
+      if (state.unread > 0) { state.unread -= 1; renderBadge(); }
+      const node = $('.nitem[data-notif="' + id + '"]');
+      if (node) node.classList.remove('unread');
+    } catch (err) {
+      toast('Could not mark read', err.message);
+    }
+  }
+
+  /** Unread count for the badge, cheap and silent so it never blocks a view. */
+  async function pollUnread() {
+    if (!state.user) return;
+    try {
+      const d = await api('/api/auth/session');
+      const n = d.unread || 0;
+      if (n !== state.unread) { state.unread = n; renderBadge(); }
+    } catch { /* offline: keep the last known count */ }
+  }
+
+  const skeletonGrid = (n, h) => `
+    <div class="grid stats">${Array.from({ length: n })
+      .map(() => '<div class="card skeleton" style="height:' + (h || 104) + 'px"></div>').join('')}</div>`;
+
+  const emptyState = (msg) => '<div class="card"><div class="empty">' + esc(msg) + '</div></div>';
+
+  /* ================= auth ================= */
+
+  async function login(role) {
+    $$('#switcher button').forEach((b) => { b.disabled = true; });
+    try {
+      const res = await api('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ role }),
+      });
+      if (res.mfaRequired) {
+        $$('#switcher button').forEach((b) => { b.disabled = false; });
+        return promptMfa(res.challenge);
+      }
+      state.token = res.token;
+      state.csrf = res.csrfToken || null;
+      state.user = res.user;
+      state.role = res.user.role;
+      state.selectedStudent = null;
+      state.ttab = 'roster';
+      resetRegister();
+      renderWho();
+      // The login response has no unread count, so fill the badge in the
+      // background rather than blocking the dashboard on a second round trip.
+      pollUnread();
+      $$('#switcher button').forEach((b) => { b.disabled = false; });
+      await route();
+    } catch (err) {
+      $$('#switcher button').forEach((b) => { b.disabled = false; });
+      toast('Sign-in failed', err.message);
+    }
+  }
+
+  /** Second step when the account has MFA switched on. */
+  async function promptMfa(challenge) {
+    const code = window.prompt('This account requires a verification code. Enter the 6-digit code from your authenticator app:');
+    if (!code) return;
+    try {
+      const res = await api('/api/auth/mfa/verify', {
+        method: 'POST',
+        body: JSON.stringify({ challenge, code: code.trim() }),
+      });
+      state.token = res.token;
+      state.csrf = res.csrfToken || null;
+      state.user = res.user;
+      state.role = res.user.role;
+      renderWho();
+      pollUnread();
+      await route();
+    } catch (err) {
+      toast('Verification failed', err.message);
+    }
+  }
+
+  function renderWho() {
+    const el = $('#who');
+    const bell = $('#bell');
+    const signOutBtn = $('#signOut');
+    // The control room caches the session to decide which tabs it may show, so
+    // it has to hear about a role switch — the role button is a demo login, and
+    // a stale cache would leave an accountant staring at the teacher tabs.
+    document.dispatchEvent(new CustomEvent('cf:refresh-user'));
+    if (!state.user) {
+      el.hidden = true;
+      bell.hidden = true;
+      signOutBtn.hidden = true;
+      return;
+    }
+    el.hidden = false;
+    bell.hidden = false;
+    signOutBtn.hidden = false;
+    $('#whoAvatar').textContent = String(state.user.name || '?')
+      .split(/\s+/).slice(0, 2).map((s) => s[0]).join('').toUpperCase();
+    $('#whoName').textContent = state.user.name;
+    $('#whoRole').textContent = state.user.role;
+    renderBadge();
+  }
+
+  const setPressed = (role) => $$('#switcher button').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.role === role));
+  });
+
+  /* ================= accountant ================= */
+
+  function riskDial(score, severity) {
+    const R = 54, C = 2 * Math.PI * R;
+    const s = clamp(score, 0, 100);
+    const offset = C - (s / 100) * C;
+    const color = SEV_COLOR[sev(severity)] || 'var(--accent)';
+    return '' +
+      '<div class="dial"><svg width="132" height="132" viewBox="0 0 132 132">' +
+        '<circle class="track" cx="66" cy="66" r="' + R + '" fill="none" stroke-width="9"/>' +
+        '<circle class="fill" cx="66" cy="66" r="' + R + '" fill="none" stroke="' + color + '"' +
+          ' stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '"' +
+          ' stroke-dashoffset="' + offset.toFixed(1) + '"/>' +
+      '</svg><div class="dial-center">' +
+        '<div class="n" style="color:' + color + '">' + Math.round(s) + '</div>' +
+        '<div class="u">risk</div>' +
+        '<div class="s" style="color:' + color + '">' + esc(sev(severity)) + '</div>' +
+      '</div></div>';
+  }
+
+  function aiMeta(ai) {
+    if (!ai) return '';
+    const model = ai.model ? esc(ai.model) : esc(ai.source);
+    const ms = ai.latencyMs != null ? (' · ' + ai.latencyMs + 'ms') : '';
+    return model + ms + (ai.cached ? ' · cached' : '');
+  }
+
+  function aiChip(d) {
+    const live = d.ai && d.ai.source !== 'offline' && d.ai.source !== 'fallback';
+    return '<div class="ai-chip ' + (live ? 'live' : 'offline') + '">' +
+      '<span class="dot"></span>' + esc(d.ai ? d.ai.source : 'unknown') + '</div>';
+  }
+
+  function accountantView(d) {
+    const t = d.metrics.totals;
+    const r = d.risk;
+    const sevClass = sev(r.severity);
+    const driftTag = r.anchorDrift > 12
+      ? '<span class="tag">anchored to baseline</span>' : '';
+
+    const stats = '' +
+      '<div class="grid stats">' +
+        '<div class="card stat tinted accent" style="--tint:var(--teal)"><div class="label">Collected</div>' +
+          '<div class="value">' + inrShort(t.collected) + '</div>' +
+          '<div class="foot"><b>' + pct(t.collectionRate) + '</b> of ' + inrShort(t.billed) + ' billed</div></div>' +
+        '<div class="card stat tinted danger" style="--tint:var(--orange)"><div class="label">Outstanding</div>' +
+          '<div class="value">' + inrShort(t.outstanding) + '</div>' +
+          '<div class="foot">across <b>' + t.defaulterCount + '</b> students (' + pct(t.defaulterRate) + ')</div></div>' +
+        '<div class="card stat tinted" style="--tint:var(--cyan)"><div class="label">Avg Attendance</div>' +
+          '<div class="value">' + pct(t.avgAttendance) + '</div>' +
+          '<div class="foot"><b>' + t.chronicAbsenteeCount + '</b> below 75%</div></div>' +
+        '<div class="card stat tinted violet" style="--tint:var(--violet)"><div class="label">At-Risk Students</div>' +
+          '<div class="value">' + t.atRiskCount + '</div>' +
+          '<div class="foot"><b>' + t.criticalCount + '</b> critical · ' + t.students + ' total</div></div>' +
+      '</div>';
+
+    const headline = '' +
+      '<div class="card pad-lg tinted" style="--tint:' + SEV_COLOR[sevClass] + ';margin-bottom:16px">' +
+        '<div class="card-head"><div>' +
+          '<div class="card-title">AI Collection Risk</div>' +
+          '<div class="card-sub mono">' + aiMeta(d.ai) + '</div>' +
+        '</div>' + aiChip(d) + '</div>' +
+        '<div class="risk-wrap">' + riskDial(r.score, r.severity) +
+          '<div style="flex:1;min-width:260px">' +
+            '<h3 style="font-size:19px;font-weight:650;letter-spacing:-.02em;margin-bottom:9px">' + esc(r.headline) + '</h3>' +
+            '<p class="muted" style="font-size:14px;line-height:1.65">' + esc(r.summary) + '</p>' +
+            '<div class="item-meta">' +
+              '<span class="tag sev-' + sevClass + '">' + SEV_ICON[sevClass] + ' ' + esc(sevClass) + '</span>' +
+              '<span class="tag num">baseline ' + r.baseline.score + '</span>' +
+              '<span class="tag num">drift ' + r.anchorDrift + '</span>' + driftTag +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    const bannerMap = {
+      critical: ['■', 'Escalation required', 'Critical'],
+      elevated: ['▲', 'Sustained recovery needed', 'Elevated'],
+      guarded:  ['●', 'Monitor closely', 'Guarded'],
+      healthy:  ['●', 'Collection is on track', 'Healthy'],
+    };
+    const bmap = bannerMap[sevClass] || bannerMap.guarded;
+
+    const riskBanner = '' +
+      '<div class="banner bg-' + sevClass + '" style="margin-bottom:16px">' +
+        '<div class="ico">' + bmap[0] + '</div><div>' +
+          '<h4>' + esc(bmap[1]) + ' — ' + esc(bmap[2]) + ' risk</h4>' +
+          '<p>' + esc(r.forecast.quarterOutlook) + '</p>' +
+          '<div class="item-meta">' +
+            '<span class="tag num">Target ' + r.forecast.collectionRateTarget + '% collection</span>' +
+            '<span class="tag num">Recoverable ' + inrShort(r.forecast.recoverableThisTerm) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    const patterns = r.defaulterPatterns.length
+      ? '<div class="card" style="margin-bottom:16px">' +
+          '<div class="card-head"><div>' +
+            '<div class="card-title">Defaulter Patterns</div>' +
+            '<div class="card-sub">Recurring behaviours detected across the arrears book</div>' +
+          '</div></div><div class="list">' +
+            r.defaulterPatterns.map((p) =>
+              '<div class="item sev-elevated">' +
+                '<div class="item-top"><div class="item-title">' + esc(p.pattern) + '</div>' +
+                  '<span class="tag num">' + p.studentsAffected + ' students</span></div>' +
+                '<div class="item-body">' + esc(p.evidence) + '</div>' +
+                '<div class="item-meta"><span class="tag p-high">Action</span>' +
+                  '<span class="muted" style="font-size:12.5px">' + esc(p.recommendedAction) + '</span></div>' +
+              '</div>').join('') +
+          '</div></div>'
+      : '';
+
+    const actions = r.actions.length
+      ? '<div class="card" style="margin-bottom:16px">' +
+          '<div class="card-head"><div>' +
+            '<div class="card-title">Action Plan</div>' +
+            '<div class="card-sub">Prioritised recovery actions, most urgent first</div>' +
+          '</div></div><div class="steps">' +
+            r.actions.map((a, i) =>
+              '<div class="step ' + esc(sev(a.priority)) + '">' +
+                '<div class="num-badge">' + (i + 1) + '</div>' +
+                '<div class="step-body"><h5>' + esc(a.action) + '</h5>' +
+                  '<div class="step-meta">' +
+                    '<span class="tag p-' + esc(sev(a.priority)) + '">' + esc(a.priority) + '</span>' +
+                    '<span class="tag">' + esc(a.owner) + '</span>' +
+                    '<span class="tag num">' + esc(a.timeline) + '</span>' +
+                    '<span class="tag num">' + esc(a.expectedRecovery) + '</span>' +
+                  '</div>' +
+                '</div></div>').join('') +
+          '</div></div>'
+      : '';
+
+    const gradeTable = '' +
+      '<div class="card"><div class="card-head"><div>' +
+        '<div class="card-title">Collection by Grade</div>' +
+        '<div class="card-sub">Collection rate and arrears concentration</div>' +
+      '</div></div><div class="table-wrap"><table>' +
+        '<thead><tr><th>Grade</th><th class="num">Students</th><th class="num">Billed</th>' +
+        '<th class="num">Outstanding</th><th>Collection</th><th class="num">Avg Att.</th></tr></thead><tbody>' +
+        d.metrics.byGrade.map((g) =>
+          '<tr><td><b>Grade ' + g.grade + '</b></td>' +
+          '<td class="num">' + g.students + '</td>' +
+          '<td class="num">' + inrShort(g.billed) + '</td>' +
+          '<td class="num" style="color:' + (g.outstanding > 0 ? 'var(--danger)' : 'var(--muted)') + '">' + inrShort(g.outstanding) + '</td>' +
+          '<td><div style="display:flex;align-items:center;gap:9px">' +
+            '<div class="bar" style="flex:1"><i style="width:' + clamp(g.collectionRate, 0, 100) + '%;background:' + colorForRate(g.collectionRate) + '"></i></div>' +
+            '<span class="mono" style="font-size:12px;min-width:48px;text-align:right">' + g.collectionRate + '%</span>' +
+          '</div></td>' +
+          '<td class="num">' + g.avgAttendance + '%</td></tr>').join('') +
+      '</tbody></table></div></div>';
+
+    const bucketColors = ['var(--crit)', 'var(--warn)', 'var(--accent)', 'var(--ok)'];
+    const buckets = '' +
+      '<div class="card"><div class="card-head"><div class="card-title">Attendance Distribution</div></div>' +
+      '<div class="list">' +
+        d.metrics.attendanceBuckets.map((b, i) => {
+          const w = (b.count / (t.students || 1)) * 100;
+          return '<div>' +
+            '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">' +
+              '<span class="muted">' + esc(b.label) + '</span>' +
+              '<span class="mono"><b>' + b.count + '</b> · ' + w.toFixed(0) + '%</span></div>' +
+            '<div class="bar"><i style="width:' + w + '%;background:' + bucketColors[i] + '"></i></div>' +
+          '</div>';
+        }).join('') +
+      '</div></div>';
+
+    const topDefaulters = '' +
+      '<div class="card"><div class="card-head"><div class="card-title">Top Defaulters</div></div>' +
+      '<div class="table-wrap"><table>' +
+        '<thead><tr><th>Student</th><th>Class</th><th class="num">Balance</th><th class="num">Att.</th></tr></thead><tbody>' +
+        d.metrics.topDefaulters.map((s) =>
+          '<tr><td><b>' + esc(s.name) + '</b><div class="faint mono" style="font-size:11px">' + esc(s.rollNo) + '</div></td>' +
+          '<td class="muted">G' + s.grade + '-' + esc(s.section) + '</td>' +
+          '<td class="num" style="color:var(--danger);font-weight:600">' + inr(s.balance) + '</td>' +
+          '<td class="num">' + s.attendance + '%</td></tr>').join('') +
+      '</tbody></table></div></div>';
+
+    return stats + headline + riskBanner + patterns + actions
+      + '<div class="grid two" style="margin-bottom:16px">' + gradeTable + buckets + '</div>'
+      + topDefaulters;
+  }
+
+  /* ================= accountant: ledger ================= */
+
+  // Kept in step with the values the seeder actually writes, so the filter offers
+// the methods that can match rather than an aspirational list.
+const METHODS = ['', 'cash', 'upi', 'card', 'netbanking', 'cheque'];
+
+  const shortDate = (s) => String(s || '').slice(0, 10);
+
+  function ledgerQuery() {
+    const L = state.ledger;
+    const p = new URLSearchParams();
+    if (L.method) p.set('method', L.method);
+    if (L.from) p.set('from', L.from);
+    if (L.to) p.set('to', L.to);
+    p.set('limit', String(L.pageSize));
+    p.set('offset', String((L.page - 1) * L.pageSize));
+    return p.toString();
+  }
+
+  /** Export href that carries the current filters — the CSV walk uses the same ones. */
+  function exportHref() {
+    const L = state.ledger;
+    const p = new URLSearchParams();
+    if (L.method) p.set('method', L.method);
+    if (L.from) p.set('from', L.from);
+    if (L.to) p.set('to', L.to);
+    return '/api/accountant/ledger.csv?' + p.toString();
+  }
+
+  function ledgerToolbar() {
+    const L = state.ledger;
+    const chips = L.views.length
+      ? '<span class="faint" style="font-size:11.5px">Saved</span>' +
+        L.views.map((v) =>
+          '<button type="button" class="btn sm' + (v.name === L.activeView ? ' primary' : '') + '" data-view="' + esc(v.name) + '">' +
+          esc(v.name) + '</button>').join('')
+      : '';
+
+    return '<div class="toolbar">' +
+      '<label class="field">Method' +
+        '<select id="lfMethod">' + METHODS.map((m) =>
+          '<option value="' + m + '"' + (m === L.method ? ' selected' : '') + '>' +
+          (m ? m.replace('_', ' ') : 'all methods') + '</option>').join('') + '</select></label>' +
+      '<label class="field">From<input type="date" id="lfFrom" value="' + esc(L.from) + '"></label>' +
+      '<label class="field">To<input type="date" id="lfTo" value="' + esc(L.to) + '"></label>' +
+      '<label class="field">Rows' +
+        '<select id="lfSize">' + [15, 30, 50, 100].map((n) =>
+          '<option value="' + n + '"' + (n === L.pageSize ? ' selected' : '') + '>' + n + '</option>').join('') +
+        '</select></label>' +
+      '<div class="spacer"></div>' +
+      '<button type="button" class="btn sm" id="lfSave">Save view</button>' +
+      '<a class="btn sm primary" id="lfCsv" href="' + esc(exportHref()) + '">Export CSV</a>' +
+      '</div>' +
+      (chips ? '<div class="toolbar" style="margin-bottom:18px">' + chips + '</div>' : '');
+  }
+
+  function agingCard(a) {
+    const buckets = [
+      ['Not yet due', a.current_due, 'var(--ok)'],
+      ['1–30 days', a.d1_30, 'var(--warn)'],
+      ['31–60 days', a.d31_60, '#fb923c'],
+      ['61–90 days', a.d61_90, 'var(--crit)'],
+      ['90+ days', a.over_90, '#b91c1c'],
+    ];
+    const sum = buckets.reduce((s, b) => s + (Number(b[1]) || 0), 0) || 1;
+    return '<div class="card"><div class="card-head"><div>' +
+      '<div class="card-title">Receivables Ageing</div>' +
+      '<div class="card-sub">' + inrShort(sum) + ' outstanding across invoices</div>' +
+      '</div></div><div class="list">' +
+      buckets.map(([label, amt, color]) => {
+        const v = Number(amt) || 0;
+        return '<div>' +
+          '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">' +
+            '<span class="muted">' + esc(label) + '</span>' +
+            '<span class="mono"><b>' + inr(v) + '</b> · ' + ((v / sum) * 100).toFixed(0) + '%</span></div>' +
+          '<div class="bar"><i style="width:' + clamp((v / sum) * 100, 0, 100) + '%;background:' + color + '"></i></div>' +
+        '</div>';
+      }).join('') +
+      '</div></div>';
+  }
+
+  function methodCard(byMethod) {
+    const total = byMethod.reduce((s, m) => s + Number(m.total), 0) || 1;
+    return '<div class="card"><div class="card-head"><div>' +
+      '<div class="card-title">Collection Mix</div>' +
+      '<div class="card-sub">' + byMethod.reduce((s, m) => s + m.payments, 0) + ' receipts all time</div>' +
+      '</div></div><div class="list">' +
+      byMethod.slice().sort((a, b) => b.total - a.total).map((m) =>
+        '<div class="bd-row"><div class="lbl">' + esc(String(m.method).replace('_', ' ')) + '</div>' +
+        '<div style="flex:1;max-width:130px"><div class="bar">' +
+        '<i style="width:' + clamp((m.total / total) * 100, 0, 100) + '%;background:var(--accent)"></i></div></div>' +
+        '<div class="amt">' + inrShort(m.total) + '</div></div>').join('') +
+      '</div></div>';
+  }
+
+  function overdueCard(rows) {
+    if (!rows.length) {
+      return '<div class="card"><div class="card-head"><div class="card-title">Overdue Instalments</div>' +
+        '<span class="tag p-low">clear</span></div>' +
+        '<div class="empty" style="padding:22px">No instalments are past due</div></div>';
+    }
+    return '<div class="card"><div class="card-head"><div>' +
+      '<div class="card-title">Overdue Instalments</div>' +
+      '<div class="card-sub">Earliest due dates first</div></div>' +
+      '<span class="tag p-critical">' + rows.length + ' due</span></div>' +
+      '<div class="table-wrap"><table><thead><tr><th>Student</th><th>Instalment</th>' +
+      '<th>Due</th><th class="num">Amount</th></tr></thead><tbody>' +
+      rows.map((r) =>
+        '<tr><td><b>' + esc(r.student_name) + '</b><div class="faint mono" style="font-size:11px">' +
+          esc(r.roll_no) + ' · G' + r.grade + '</div></td>' +
+        '<td class="muted">' + esc(String(r.label || r.term || 'Instalment').replace(/_/g, ' ')) + '</td>' +
+        '<td class="mono" style="color:var(--danger)">' + shortDate(r.due_date) + '</td>' +
+        '<td class="num" style="font-weight:600">' + inr(r.amount) + '</td></tr>').join('') +
+      '</tbody></table></div></div>';
+  }
+
+  function ledgerView(d) {
+    const L = state.ledger;
+    const total = d.total || 0;
+    const shown = d.rows || [];
+    const page = d.pages || 1;
+
+    const sumShown = shown.reduce((s, r) => s + Number(r.amount || 0), 0);
+
+    const table = shown.length
+      ? '<div class="table-wrap"><table>' +
+          '<thead><tr><th>Receipt</th><th>Paid</th><th>Student</th><th>Invoice</th>' +
+          '<th>Category</th><th>Method</th><th class="num">Amount</th></tr></thead><tbody>' +
+          shown.map((r) =>
+            '<tr><td class="mono" style="font-size:12px">' + esc(r.receipt_no) + '</td>' +
+            '<td class="mono">' + shortDate(r.paid_at) + '</td>' +
+            '<td><b>' + esc(r.student_name) + '</b>' +
+              '<div class="faint mono" style="font-size:11px">' + esc(r.roll_no) + ' · G' + r.grade + '</div></td>' +
+            '<td class="mono muted" style="font-size:12px">' + esc(r.invoice_no) + '</td>' +
+            '<td class="muted">' + esc(String(r.category || '').replace(/_/g, ' ')) + '</td>' +
+            '<td><span class="tag">' + esc(String(r.method).replace('_', ' ')) + '</span></td>' +
+            '<td class="num" style="font-weight:600">' + inr(r.amount) + '</td></tr>').join('') +
+          '</tbody></table></div>'
+      : '<div class="empty">No receipts match these filters</div>';
+
+    return ledgerToolbar() +
+      '<div class="grid stats">' +
+        '<div class="card stat accent"><div class="label">Receipts</div>' +
+          '<div class="value">' + total + '</div>' +
+          '<div class="foot">matching the current filter</div></div>' +
+        '<div class="card stat"><div class="label">Value On This Page</div>' +
+          '<div class="value">' + inrShort(sumShown) + '</div>' +
+          '<div class="foot">' + shown.length + ' of ' + total + ' rows</div></div>' +
+        '<div class="card stat"><div class="label">Overdue 30+ Days</div>' +
+          '<div class="value" style="color:var(--danger)">' +
+            inrShort((d.aging.d31_60 || 0) + (d.aging.d61_90 || 0) + (d.aging.over_90 || 0)) + '</div>' +
+          '<div class="foot">aged beyond a month</div></div>' +
+        '<div class="card stat"><div class="label">Export</div>' +
+          '<div class="value" style="font-size:19px;padding-top:6px">CSV</div>' +
+          '<div class="foot">whole filtered set, not one page</div></div>' +
+      '</div>' +
+      '<div class="card" style="margin-bottom:16px"><div class="card-head"><div>' +
+        '<div class="card-title">Receipts Ledger</div>' +
+        '<div class="card-sub">' + (L.method ? L.method.replace('_', ' ') : 'all methods') +
+          (L.from || L.to ? ' · ' + (L.from || 'start') + ' → ' + (L.to || 'today') : '') + '</div>' +
+        '</div></div>' + table +
+        '<div class="pager">' +
+          '<span>Page ' + L.page + ' of ' + page + '</span>' +
+          '<button type="button" class="btn sm" id="lgPrev"' + (L.page <= 1 ? ' disabled' : '') + '>Previous</button>' +
+          '<button type="button" class="btn sm" id="lgNext"' + (L.page >= page ? ' disabled' : '') + '>Next</button>' +
+        '</div></div>' +
+      '<div class="grid two" style="margin-bottom:16px">' + agingCard(d.aging) + methodCard(d.byMethod || []) + '</div>' +
+      overdueCard(d.overdueInstallments || []);
+  }
+
+  function wireLedger() {
+    const L = state.ledger;
+
+    const reload = () => { L.page = 1; route(); };
+
+    const m = $('#lfMethod');
+    if (m) m.addEventListener('change', () => { L.method = m.value; L.activeView = ''; reload(); });
+
+    const f = $('#lfFrom');
+    if (f) f.addEventListener('change', () => { L.from = f.value; L.activeView = ''; reload(); });
+
+    const t = $('#lfTo');
+    if (t) t.addEventListener('change', () => { L.to = t.value; L.activeView = ''; reload(); });
+
+    const sz = $('#lfSize');
+    if (sz) sz.addEventListener('change', () => { L.pageSize = Number(sz.value) || 15; reload(); });
+
+    const prev = $('#lgPrev');
+    if (prev) prev.addEventListener('click', () => { if (L.page > 1) { L.page -= 1; route(); } });
+
+    const next = $('#lgNext');
+    if (next) next.addEventListener('click', () => { L.page += 1; route(); });
+
+    $$('#view [data-view]').forEach((b) => b.addEventListener('click', () => {
+      const v = L.views.find((x) => x.name === b.dataset.view);
+      if (!v) return;
+      L.method = v.method || '';
+      L.from = v.from || '';
+      L.to = v.to || '';
+      L.activeView = v.name;
+      L.page = 1;
+      route();
+    }));
+
+    const save = $('#lfSave');
+    if (save) save.addEventListener('click', () => {
+      const name = window.prompt('Name this ledger view (it will remember the method and date range):');
+      if (!name) return;
+      const clean = name.trim().slice(0, 40);
+      L.views = L.views.filter((v) => v.name !== clean);
+      L.views.unshift({ name: clean, method: L.method, from: L.from, to: L.to });
+      L.views = L.views.slice(0, 12);
+      L.activeView = clean;
+      saveViews();
+      route();
+    });
+  }
+
+  /* ================= accountant: alerts tab ================= */
+
+  function alertsView(d) {
+    const list = d.notifications || [];
+    const gen = d.generated || {};
+
+    const stats = '<div class="grid stats">' +
+      '<div class="card stat' + (d.unread ? ' danger' : ' ok') + '"><div class="label">Unread</div>' +
+        '<div class="value">' + d.unread + '</div>' +
+        '<div class="foot">' + (d.unread ? 'waiting on you' : 'all caught up') + '</div></div>' +
+      '<div class="card stat"><div class="label">Total</div>' +
+        '<div class="value">' + list.length + '</div>' +
+        '<div class="foot">most recent alerts</div></div>' +
+      '<div class="card stat"><div class="label">Last Sweep</div>' +
+        '<div class="value" style="font-size:19px;padding-top:6px">' + esc(ago(gen.at) || '—') + '</div>' +
+        '<div class="foot">' + (gen.created != null ? gen.created + ' created on that pass' : 'derived automatically') + '</div></div>' +
+      '<div class="card stat"><div class="label">Manual Sweep</div>' +
+        '<div class="value" style="font-size:19px;padding-top:6px">' +
+          '<button type="button" class="btn sm primary" id="alSweep">Run now</button></div>' +
+        '<div class="foot">re-derives every alert from live data</div></div>' +
+      '</div>';
+
+    const feed = '<div class="card"><div class="card-head"><div>' +
+      '<div class="card-title">Alert Feed</div>' +
+      '<div class="card-sub">Every alert is keyed to the state that produced it, so a repeat sweep never duplicates one</div>' +
+      '</div><div class="spacer"></div>' +
+      '<button type="button" class="btn sm" id="alReadAll">Mark all read</button></div>' +
+      (list.length ? list.map(notificationItem).join('')
+        : '<div class="empty">No alerts yet — run a sweep to derive them</div>') +
+      '</div>';
+
+    return stats + feed;
+  }
+
+  function wireAlerts() {
+    const sweep = $('#alSweep');
+    if (sweep) sweep.addEventListener('click', async () => {
+      sweep.disabled = true;
+      sweep.textContent = 'Sweeping…';
+      try {
+        const r = await api('/api/notifications/generate', { method: 'POST' });
+        toast('Alert sweep', r.created
+          ? r.created + ' new alert' + (r.created === 1 ? '' : 's')
+          : 'Nothing new — every derived alert already exists.');
+        await route();
+        pollUnread();
+      } catch (err) {
+        toast('Sweep failed', err.message);
+        sweep.disabled = false;
+        sweep.textContent = 'Run now';
+      }
+    });
+
+    const all = $('#alReadAll');
+    if (all) all.addEventListener('click', async () => {
+      all.disabled = true;
+      try {
+        await api('/api/notifications/read-all', { method: 'POST' });
+        state.unread = 0;
+        renderBadge();
+        await route();
+      } catch (err) {
+        toast('Could not clear alerts', err.message);
+        all.disabled = false;
+      }
+    });
+
+    $$('#view .nitem').forEach((n) => n.addEventListener('click', () => {
+      markRead(n.dataset.notif).then(() => { if (n.dataset.link === 'ledger') { state.tab = 'ledger'; route(); } });
+    }));
+  }
+
+  /* ================= teacher ================= */
+
+  function teacherView(d) {
+    const s = d.summary;
+    const h = d.health;
+    const hClass = sev(h.healthLabel);
+
+    const stats = '' +
+      '<div class="grid stats">' +
+        '<div class="card stat tinted" style="--tint:var(--violet)"><div class="label">Class Size</div>' +
+          '<div class="value">' + s.total + '</div>' +
+          '<div class="foot">' + (d.scope === 'school' ? 'all grades' : 'Grade ' + d.selectedGrade) + '</div></div>' +
+        '<div class="card stat tinted' + (s.avgAttendance >= 85 ? ' ok' : '') + '" style="--tint:var(--teal)"><div class="label">Avg Attendance</div>' +
+          '<div class="value">' + pct(s.avgAttendance) + '</div>' +
+          '<div class="foot">' + (s.total - s.atRisk) + ' students stable</div></div>' +
+        '<div class="card stat tinted danger" style="--tint:var(--orange)"><div class="label">Outstanding</div>' +
+          '<div class="value">' + inrShort(s.totalOutstanding) + '</div>' +
+          '<div class="foot">across the class</div></div>' +
+        '<div class="card stat tinted" style="--tint:' + SEV_COLOR[hClass] + '"><div class="label">Class Health</div>' +
+          '<div class="value sev-' + hClass + '">' + h.healthScore + '</div>' +
+          '<div class="foot"><b>' + s.atRisk + '</b> need intervention · <b>' + s.critical + '</b> critical</div></div>' +
+      '</div>';
+
+    let focus = '';
+    if (h.focusAreas && h.focusAreas.length) {
+      let interventions = '';
+      if (h.interventions && h.interventions.length) {
+        interventions = '<div class="mt-16"><div class="card-title" style="margin-bottom:10px">Priority Caseload</div>' +
+          '<div class="stack">' + h.interventions.map((iv) =>
+            '<div class="item sev-' + esc(sev(iv.severity)) + '">' +
+              '<div class="item-top"><div class="item-title">' + esc(iv.student) +
+                '<span class="sub" style="margin-left:7px">' + esc(iv.rollNo) + '</span></div>' +
+              '<span class="tag sev-' + esc(sev(iv.severity)) + '">' + iv.score + '</span></div>' +
+              '<div class="item-body">' + esc(iv.note) + '</div></div>').join('') + '</div></div>';
+      }
+      focus = '' +
+        '<div class="card tinted gap-b" style="--tint:' + SEV_COLOR[hClass] + '">' +
+          '<div class="card-head"><div>' +
+            '<div class="card-title">Class Diagnosis</div>' +
+            '<div class="card-sub">' + esc(h.summary) + '</div>' +
+          '</div><div class="ai-chip"><span class="dot" style="background:' + SEV_COLOR[hClass] + '"></span>' + esc(hClass) + '</div></div>' +
+          '<div class="list">' + h.focusAreas.map((f) =>
+            '<div class="item sev-' + hClass + '">' +
+              '<div class="item-top"><div class="item-title">' + esc(f.area) + '</div>' +
+              '<span class="tag num">' + f.students + ' students</span></div>' +
+              '<div class="item-body">' + esc(f.detail) + '</div></div>').join('') +
+          '</div>' + interventions +
+        '</div>';
+    }
+
+    const rows = d.roster.length
+      ? d.roster.map((st) => {
+          const sClass = sev(st.severity);
+          const active = state.selectedStudent === st.id ? ' active' : '';
+          return '<tr class="clickable' + active + '" data-student="' + st.id + '" title="Generate an AI recovery plan">' +
+            '<td><b>' + esc(st.name) + '</b><div class="faint mono" style="font-size:11px">' + esc(st.rollNo) + '</div></td>' +
+            '<td class="muted">G' + st.grade + '-' + esc(st.section) + '</td>' +
+            '<td class="num" style="color:' + colorForRate(st.attendance) + '">' + st.attendance + '%</td>' +
+            '<td class="num">' + inrShort(st.balance) + '</td>' +
+            '<td><div style="display:flex;align-items:center;gap:9px">' +
+              '<div class="bar" style="flex:1"><i style="width:' + clamp(st.riskScore, 0, 100) + '%;background:' + SEV_COLOR[sClass] + '"></i></div>' +
+              '<span class="mono" style="font-size:12px;min-width:26px;text-align:right">' + st.riskScore + '</span>' +
+            '</div></td>' +
+            '<td><span class="tag sev-' + sClass + '">' + esc(sClass) + '</span></td></tr>';
+        }).join('')
+      : '<tr><td colspan="6" class="faint" style="text-align:center;padding:28px">No students in this grade.</td></tr>';
+
+    const roster = '' +
+      '<div class="card tinted gap-b" style="--tint:var(--accent)"><div class="card-head"><div>' +
+        '<div class="card-title">Class Roster</div>' +
+        '<div class="card-sub">Sorted by risk score — click any student for an AI recovery plan</div>' +
+      '</div></div><div class="table-wrap"><table>' +
+        '<thead><tr><th>Student</th><th>Class</th><th class="num">Att.</th>' +
+        '<th class="num">Balance</th><th>Risk</th><th>Status</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div></div>';
+
+    /* ---- subject averages (only meaningful for a single grade) ---- */
+    const avgs = d.subjectAverages || [];
+    const avgColor = (a) => (a >= 80 ? 'var(--ok)' : a >= 65 ? 'var(--warn)' : 'var(--crit)');
+
+    const subjectCard = avgs.length
+      ? '<div class="card tinted gap-b" style="--tint:var(--cyan)"><div class="card-head"><div>' +
+        '<div class="card-title">Subject Averages</div>' +
+        '<div class="card-sub">' + esc((d.term && d.term.name) || 'Current term') +
+          ' · spread across the selected grade</div></div></div>' +
+        '<div class="table-wrap"><table><thead><tr><th>Subject</th><th class="num">Students</th>' +
+        '<th class="num">Lowest</th><th class="num">Average</th><th class="num">Highest</th><th>Distribution</th>' +
+        '</tr></thead><tbody>' +
+        avgs.map((a) => {
+          const span = Math.max(1, a.highest - a.lowest);
+          const lo = ((a.lowest - a.average) / span) * 50;
+          const hi = lo + (50 / 50) * 50;
+          return '<tr><td><b>' + esc(a.subject) + '</b></td>' +
+            '<td class="num muted">' + a.students + '</td>' +
+            '<td class="num" style="color:var(--danger)">' + a.lowest + '</td>' +
+            '<td class="num" style="font-weight:650;color:' + avgColor(a.average) + '">' + a.average + '</td>' +
+            '<td class="num" style="color:var(--ok)">' + a.highest + '</td>' +
+            '<td><div style="position:relative;height:16px;min-width:120px">' +
+              '<div style="position:absolute;inset:6px 0;border-radius:3px;background:var(--line)"></div>' +
+              '<div style="position:absolute;top:6px;bottom:6px;left:' + clamp(50 + lo, 0, 100) +
+                '%;width:' + clamp(hi - lo, 1, 100) + '%;border-radius:3px;background:' + avgColor(a.average) +
+                ';opacity:.45"></div>' +
+              '<div style="position:absolute;top:3px;left:' + clamp((a.average - a.lowest) / span * 100, 0, 100) +
+                '%;width:2px;height:10px;background:var(--text)"></div>' +
+            '</div></td></tr>';
+        }).join('') +
+        '</tbody></table></div></div>'
+      : '<div class="card tinted gap-b" style="--tint:var(--cyan)"><div class="empty">' +
+        'Pick a single grade to see subject-level averages</div></div>';
+
+    /* ---- attendance status mix ---- */
+    const breakdown = d.attendance || [];
+    const attCard = breakdown.length
+      ? '<div class="card tinted" style="--tint:var(--teal)"><div class="card-head"><div>' +
+        '<div class="card-title">Attendance Mix</div>' +
+        '<div class="card-sub">Every recorded day in this scope</div></div></div>' +
+        '<div class="list">' + breakdown.slice().sort((a, b) => b.count - a.count).map((b) =>
+          '<div class="bd-row"><div class="lbl">' +
+            '<span class="swatch" style="background:' + attMeta(b.status).tone + '"></span>' +
+            esc(b.status) + '</div>' +
+          '<div style="flex:1;max-width:140px"><div class="bar"><i style="width:' +
+            clamp(b.share, 0, 100) + '%;background:' + attMeta(b.status).tone + '"></i></div></div>' +
+          '<div class="amt">' + b.count + ' <span class="faint" style="font-weight:400">· ' +
+            b.share + '%</span></div></div>').join('') +
+        '</div></div>'
+      : '';
+
+    if (state.ttab === 'attendance') return stats + rollCallView(d);
+    if (state.ttab === 'insights') return stats + focus + subjectCard + attCard;
+
+    const plan = state.selectedStudent ? '<div id="planHost">' + skeletonGrid(1, 190) + '</div>' : '';
+    return stats + roster + plan;
+  }
+
+  /* ================= roll call ================= */
+
+  /**
+   * The register. Marks live in `state.attendance.draft` until saved, so a
+   * mis-click never hits the database on its own and the whole class can be
+   * filed in one request.
+   */
+  function rollCallView(d) {
+    const a = state.attendance;
+    const day = a.day || (d.today || isoDay(new Date()));
+    const students = d.students || [];
+    const saved = a.saved || {};
+    const dirty = new Set(Object.keys(a.draft).filter((id) => a.draft[id] !== (saved[id] || '')).map(String));
+
+    const effective = (st) => (Object.prototype.hasOwnProperty.call(a.draft, st.id)
+      ? a.draft[st.id]
+      : (saved[st.id] || ''));
+
+    const tallies = { present: 0, late: 0, absent: 0, excused: 0, '': 0 };
+    for (const st of students) tallies[effective(st)] += 1;
+    const marked = students.length - tallies[''];
+
+    if (!students.length) {
+      return '<div class="card"><div class="empty">No students in this scope — pick a grade above.</div></div>';
+    }
+
+    /* Colourful tally chips double as bulk "set everyone to this" buttons. */
+    const tallyBar = '<div class="tallybar">' + ATT_STATES.map((s) => {
+      const m = attMeta(s);
+      return '<button type="button" class="tally" data-bulk="' + s + '"' +
+        (tallies[s] ? ' data-paint="' + s + '"' : '') +
+        ' style="--tone:' + m.tone + '" title="Mark everyone ' + m.label.toLowerCase() + '">' +
+        '<span class="dot"></span>' + m.label + ' <b>' + tallies[s] + '</b></button>';
+    }).join('') +
+      '<button type="button" class="tally" data-bulk=""' + (tallies[''] ? ' data-paint=""' : '') +
+        ' style="--tone:var(--faint)" title="Clear every mark on this sheet">' +
+        '<span class="dot"></span>Unmarked <b>' + tallies[''] + '</b></button></div>';
+
+    const cards = students.map((st, i) => {
+      const status = effective(st);
+      const m = attMeta(status);
+      const isDirty = dirty.has(String(st.id));
+      const pctBar = clamp(st.attendance, 0, 100);
+      return '<button type="button" class="rcard' + (isDirty ? ' dirty' : '') + '" data-rc="' + st.id + '"' +
+        ' data-status="' + status + '" style="--tone:' + m.tone + '"' +
+        ' data-index="' + i + '"' +
+        ' title="' + esc(st.name) + ' — click to cycle, or press ' + (status ? m.label[0] : 'P') +
+        ' to set' + (isDirty ? ' · unsaved' : '') + '">' +
+        '<div class="rc-top"><span class="rc-name">' + esc(st.name) + '</span>' +
+          '<span class="rc-state">' + m.icon + ' ' + m.label + '</span></div>' +
+        '<div class="rc-meta">' + esc(st.rollNo) + ' · G' + st.grade + '-' + esc(st.section) +
+          ' · ' + st.attendance + '% overall</div>' +
+        '<div class="rc-bar" style="width:' + pctBar + '%"></div></button>';
+    }).join('');
+
+    const weekend = /^(Saturday|Sunday)$/.test(weekdayOf(day));
+
+    return '' +
+      '<div id="rcCard" class="card tinted" style="--tint:' + (marked ? 'var(--teal)' : 'var(--warn)') + '">' +
+        '<div class="card-head"><div>' +
+          '<div class="card-title">Register · ' + esc(prettyDay(day)) + '</div>' +
+          '<div class="card-sub">' + marked + ' of ' + students.length + ' marked' +
+            (dirty.size ? ' · <b style="color:var(--warn)">' + dirty.size + ' unsaved</b>' : '') +
+            (weekend ? ' · weekend, marking is unusual' : '') + '</div>' +
+        '</div>' +
+          '<div class="kv">' +
+            '<button type="button" class="btn sm" id="rcPrev" title="Previous day" aria-label="Previous day">&#8249;</button>' +
+            '<input type="date" id="rcDay" value="' + esc(day) + '" max="' + esc(d.today || isoDay(new Date())) + '"' +
+              ' aria-label="Register date" />' +
+            '<button type="button" class="btn sm" id="rcNext" title="Next day" aria-label="Next day">&#8250;</button>' +
+          '</div>' +
+        '</div>' +
+
+        tallyBar +
+
+        '<div class="rollcall">' + cards + '</div>' +
+
+        '<div class="savebar">' +
+          '<span class="faint" style="font-size:12.5px">' +
+            (dirty.size ? dirty.size + ' change' + (dirty.size === 1 ? '' : 's') + ' to save' : 'Everything saved') +
+          '</span>' +
+          '<div class="spacer"></div>' +
+          '<button type="button" class="btn ghost" id="rcUndo" ' + (dirty.size ? '' : 'disabled') + '>Discard</button>' +
+          '<button type="button" class="btn primary" id="rcSave" ' + (dirty.size ? '' : 'disabled') + '>' +
+            (a.busy ? 'Saving…' : 'Save register') + '</button>' +
+        '</div>' +
+        '<p class="faint hide-sm" style="font-size:11.5px;margin-top:12px">' +
+          'Click a student to cycle ' + ATT_STATES.map((s) => attMeta(s).label.toLowerCase()).join(' → ') +
+          ' → unmarked. Or focus one and press <b>P</b>, <b>L</b>, <b>A</b>, <b>E</b>; arrow keys move, <b>0</b> clears.</p>' +
+      '</div>';
+  }
+
+  /** Repaint only the register card, so a click does not refetch the page or
+   *  disturb the stat tiles beside it. */
+  function refreshRollCall(d) {
+    const host = $('#rcCard');
+    if (!host) return;
+    host.outerHTML = rollCallView(d);
+    wireRollCall();
+  }
+
+
+  function planView(d) {
+    const p = d.plan;
+    const pClass = sev(p.riskLevel);
+
+    const group = (title, items) => (items && items.length)
+      ? '<div class="plan-group"><h6>' + esc(title) + '</h6>' +
+        items.map((x) => '<div class="chk"><span>' + esc(x) + '</span></div>').join('') +
+        '</div>'
+      : '';
+
+    let causes = '';
+    if (p.rootCauses && p.rootCauses.length) {
+      causes = '<div class="card-title" style="margin-bottom:10px">Root Causes</div>' +
+        '<div class="list" style="margin-bottom:20px">' +
+        p.rootCauses.map((c) => '<div class="chk"><span>' + esc(c) + '</span></div>').join('') + '</div>';
+    }
+
+    let milestones = '';
+    if (p.milestones && p.milestones.length) {
+      milestones = '<div class="card-title" style="margin-bottom:14px">Milestones</div><div class="steps">' +
+        p.milestones.map((m, i) =>
+          '<div class="step"><div class="num-badge">' + (i + 1) + '</div>' +
+          '<div class="step-body"><h5>' + esc(m.week) + ' — ' + esc(m.target) + '</h5>' +
+          '<div class="step-meta"><span class="tag num">' + esc(m.successMetric) + '</span></div></div></div>').join('') +
+        '</div>';
+    }
+
+    return '' +
+      '<div class="card pad-lg" style="margin:16px 0">' +
+        '<div class="card-head"><div>' +
+          '<div class="card-title">AI Recovery Plan</div>' +
+          '<div class="card-sub">' + esc(p.student.name) + ' · ' + esc(p.student.rollNo) +
+            ' · Grade ' + p.student.grade + '-' + esc(p.student.section) + '</div>' +
+        '</div>' + aiChip(d) + '</div>' +
+
+        '<div class="risk-wrap" style="margin-bottom:20px">' + riskDial(p.riskScore, p.riskLevel) +
+          '<div style="flex:1;min-width:260px">' +
+            '<h3 style="font-size:18px;font-weight:650;letter-spacing:-.02em;margin-bottom:9px">' + esc(p.summary) + '</h3>' +
+            '<p class="muted" style="font-size:14px;line-height:1.65">' + esc(p.diagnosis) + '</p>' +
+            '<div class="item-meta">' +
+              '<span class="tag sev-' + pClass + '">' + SEV_ICON[pClass] + ' ' + esc(pClass) + '</span>' +
+              '<span class="tag num">baseline ' + p.baseline.score + '</span>' +
+              '<span class="tag num">att ' + p.student.attendance + '%</span>' +
+              '<span class="tag num">due ' + inrShort(p.student.balance) + '</span>' +
+              (p.cohort ? '<span class="tag num">class avg ' + p.cohort.avgAttendance + '%</span>' : '') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="banner bg-' + pClass + '" style="margin-bottom:20px">' +
+          '<div class="ico">&#9678;</div>' +
+          '<div><h4>First win</h4><p>' + esc(p.firstWin) + '</p></div>' +
+        '</div>' +
+
+        causes +
+
+        '<div class="grid two" style="margin-bottom:20px">' +
+          '<div class="card" style="background:var(--surface-2)">' +
+            '<div class="card-title" style="margin-bottom:14px">Intervention Plan</div>' +
+            group('Academics', p.plan.academics) +
+            group('Attendance', p.plan.attendance) +
+            group('Engagement', p.plan.engagement) +
+          '</div>' +
+          '<div class="card" style="background:var(--surface-2)">' +
+            '<div class="card-title" style="margin-bottom:14px">Stakeholder Actions</div>' +
+            group('Finance', p.plan.finance) +
+            group('Family', p.plan.family) +
+          '</div>' +
+        '</div>' +
+
+        milestones +
+      '</div>';
+  }
+
+  /* ================= student ================= */
+
+  function studentView(d) {
+    const f = d.fees;
+    const a = d.attendance;
+    const clear = f.status === 'clear';
+    const cls = clear ? ' ok' : (f.status === 'overdue_high' ? ' danger' : '');
+
+    const stats = '' +
+      '<div class="grid stats">' +
+        '<div class="card stat tinted' + cls + '" style="--tint:var(--orange)"><div class="label">Outstanding Dues</div>' +
+          '<div class="value">' + inr(f.outstanding) + '</div>' +
+          '<div class="foot">' + (clear ? 'account fully settled' : 'payment required') + '</div></div>' +
+        '<div class="card stat tinted" style="--tint:var(--teal)"><div class="label">Settled</div>' +
+          '<div class="value">' + pct(f.settlementPercent) + '</div>' +
+          '<div class="foot">' + inr(f.totalPaid) + ' of ' + inr(f.totalBilled) + '</div></div>' +
+        '<div class="card stat tinted' + (a.band === 'healthy' ? ' ok' : '') + '" style="--tint:var(--cyan)"><div class="label">Attendance</div>' +
+          '<div class="value">' + pct(a.percentage) + '</div>' +
+          '<div class="foot">' + esc(a.band.replace('_', ' ')) + '</div></div>' +
+        '<div class="card stat tinted violet" style="--tint:var(--violet)"><div class="label">Class</div>' +
+          '<div class="value" style="font-size:22px">G' + d.profile.grade + '-' + esc(d.profile.section) + '</div>' +
+          '<div class="foot mono" style="font-size:11.5px">' + esc(d.profile.rollNo) + '</div></div>' +
+      '</div>';
+
+    const statusBanner = '' +
+      '<div class="banner ' + (clear ? 'bg-healthy' : (f.status === 'overdue_high' ? 'bg-critical' : 'bg-elevated')) + '" style="margin:16px 0">' +
+        '<div class="ico">' + (clear ? '●' : '▲') + '</div>' +
+        '<div><h4>' + (clear ? 'All clear' : 'Payment reminder') + '</h4>' +
+        '<p>' + esc(d.guidance) + '</p></div></div>';
+
+    const colors = { billed: 'var(--accent)', paid: 'var(--ok)', due: clear ? 'var(--ok)' : 'var(--crit)' };
+    const progress = '' +
+      '<div class="card tinted" style="--tint:var(--teal);margin-bottom:16px">' +
+        '<div class="card-head"><div>' +
+          '<div class="card-title">Fee Settlement</div>' +
+          '<div class="card-sub">Billed versus paid for the current academic year</div>' +
+        '</div><span class="tag num">' + f.settlementPercent + '% settled</span></div>' +
+        '<div class="progress' + (clear ? '' : (f.settlementPercent < 40 ? ' empty' : ' partial')) + '">' +
+          '<i style="width:' + clamp(f.settlementPercent, 0, 100) + '%"></i></div>' +
+        '<div class="mt-16">' +
+          f.breakdown.map((b) =>
+            '<div class="bd-row"><div class="lbl"><span class="swatch" style="background:' + colors[b.kind] + '"></span>' +
+            esc(b.label) + '</div><div class="amt">' + inr(b.amount) + '</div></div>').join('') +
+        '</div>' +
+      '</div>';
+
+    const profile = '' +
+      '<div class="card tinted" style="--tint:var(--violet);margin-bottom:16px">' +
+        '<div class="card-head"><div class="card-title">Student Record</div></div>' +
+        '<div class="bd-row"><div class="lbl">Name</div><div class="amt">' + esc(d.profile.name) + '</div></div>' +
+        '<div class="bd-row"><div class="lbl">Roll Number</div><div class="amt mono">' + esc(d.profile.rollNo) + '</div></div>' +
+        '<div class="bd-row"><div class="lbl">Grade</div><div class="amt">Grade ' + d.profile.grade + ' · ' + esc(d.profile.section) + '</div></div>' +
+        '<div class="bd-row"><div class="lbl">Email</div><div class="amt mono" style="font-size:12.5px">' + esc(d.profile.email) + '</div></div>' +
+        '<div class="bd-row"><div class="lbl">Risk Score</div><div class="amt">' +
+          '<span class="tag sev-' + esc(sev(d.risk.severity)) + '">' + d.risk.score + ' · ' + esc(d.risk.severity) + '</span></div></div>' +
+      '</div>';
+
+    const attCopy = a.percentage >= 90
+      ? 'Attendance is in the healthy band. Keep it up — consistency is the strongest predictor of outcomes.'
+      : a.percentage >= 80
+        ? 'Attendance is in the watch band. Aim for 90% this term; every additional week of presence compounds.'
+        : 'Attendance is below the 75% threshold where learning continuity breaks down. Contact your class teacher to build a recovery plan.';
+
+    const attendance = '' +
+      '<div class="card tinted" style="--tint:var(--teal)"><div class="card-head"><div class="card-title">Attendance</div>' +
+        '<span class="tag num">' + pct(a.percentage) + '</span></div>' +
+        '<div class="progress' + (a.percentage >= 90 ? '' : (a.percentage >= 80 ? ' partial' : ' empty')) + '">' +
+          '<i style="width:' + clamp(a.percentage, 0, 100) + '%"></i></div>' +
+        '<p class="muted mt-16" style="font-size:13.5px;line-height:1.6">' + esc(attCopy) + '</p>' +
+        (a.recent && a.recent.length
+          ? '<div style="margin-top:16px"><div class="faint" style="font-size:11px;text-transform:uppercase;' +
+            'letter-spacing:.07em;font-weight:650;margin-bottom:8px">Last ' + a.recent.length + ' school days</div>' +
+            '<div class="attstrip">' + a.recent.slice().reverse().map((r) =>
+              '<i class="' + esc(r.status) + '" title="' + esc(r.day) + ' · ' + esc(r.status) + '"></i>').join('') +
+            '</div></div>'
+          : '') +
+      '</div>';
+
+    /* ---- academics ---- */
+    const ac = d.academics || {};
+    const results = ac.results || [];
+
+    const academics = '<div class="card tinted" style="--tint:var(--cyan);margin-bottom:16px">' +
+      '<div class="card-head"><div>' +
+        '<div class="card-title">Academics</div>' +
+        '<div class="card-sub">' + esc(ac.term || 'Current term') + ' · ' +
+          (ac.subjects ? ac.subjects.length : 0) + ' subjects enrolled</div></div>' +
+        (ac.average != null ? '<span class="tag num">avg ' + ac.average + '</span>' : '') +
+      '</div>' +
+      (results.length
+        ? '<div class="table-wrap"><table><thead><tr><th>Subject</th><th class="num">Score</th>' +
+          '<th class="num">Class avg</th><th>Relative</th><th>Grade</th></tr></thead><tbody>' +
+          results.map((r) => {
+            const diff = r.classAverage != null ? Number(r.score) - Number(r.classAverage) : null;
+            const ratio = r.maxScore ? (r.score / r.maxScore) * 100 : null;
+            return '<tr><td><b>' + esc(r.subject) + '</b>' +
+              '<div class="faint mono" style="font-size:11px">' + esc(r.subjectCode || '') + '</div></td>' +
+              '<td class="num" style="font-weight:600">' + r.score +
+                '<div class="faint mono" style="font-size:11px">of ' + r.maxScore + '</div></td>' +
+              '<td class="num muted">' + (r.classAverage != null ? r.classAverage : '—') + '</td>' +
+              '<td>' + (diff == null ? '<span class="tag p-low">—</span>'
+                : '<span class="tag" style="' + (diff >= 0
+                    ? 'color:var(--ok);border-color:rgba(52,211,153,.32)'
+                    : 'color:var(--warn);border-color:rgba(251,191,36,.32)') + '">' +
+                  (diff >= 0 ? '+' : '') + diff.toFixed(1) + '</span>') +
+              '</td>' +
+              '<td><div style="display:flex;align-items:center;gap:9px">' +
+                '<div class="bar" style="flex:1"><i style="width:' + clamp(ratio, 0, 100) +
+                  '%;background:' + colorForRate(ratio) + '"></i></div>' +
+                '<span class="tag num">' + esc(r.letter || '—') + '</span></div></td></tr>';
+          }).join('') +
+          '</tbody></table></div>'
+        : '<div class="empty">No results published for this term yet</div>') +
+      '</div>';
+
+    /* ---- fee detail ---- */
+    const invoices = f.invoices || [];
+    const payments = f.payments || [];
+    const installments = f.installments || [];
+    const today = new Date().toISOString().slice(0, 10);
+
+    const invoiceTable = invoices.length
+      ? '<div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Category</th><th>Issued</th>' +
+        '<th class="num">Billed</th><th class="num">Paid</th><th>Status</th></tr></thead><tbody>' +
+        invoices.map((i) =>
+          '<tr><td class="mono" style="font-size:12px">' + esc(i.invoice_no) + '</td>' +
+          '<td class="muted">' + esc(String(i.category || '').replace(/_/g, ' ')) + '</td>' +
+          '<td class="mono">' + shortDate(i.issued_at) + '</td>' +
+          '<td class="num">' + inr(i.amount_billed) + '</td>' +
+          '<td class="num">' + inr(i.amount_paid) + '</td>' +
+          '<td><span class="tag sev-' + esc(feeSev(i.status)) + '">' + esc(String(i.status).replace('_', ' ')) + '</span></td></tr>').join('') +
+        '</tbody></table></div>'
+      : '<div class="empty">No invoices issued</div>';
+
+    const paymentTable = payments.length
+      ? '<div class="table-wrap"><table><thead><tr><th>Receipt</th><th>Paid</th><th>Invoice</th>' +
+        '<th>Method</th><th class="num">Amount</th></tr></thead><tbody>' +
+        payments.map((p) =>
+          '<tr><td class="mono" style="font-size:12px">' + esc(p.receipt_no) + '</td>' +
+          '<td class="mono">' + shortDate(p.paid_at) + '</td>' +
+          '<td class="mono muted" style="font-size:12px">' + esc(p.invoice_no) + '</td>' +
+          '<td><span class="tag">' + esc(String(p.method).replace('_', ' ')) + '</span></td>' +
+          '<td class="num" style="font-weight:600;color:var(--ok)">' + inr(p.amount) + '</td></tr>').join('') +
+        '</tbody></table></div>'
+      : '<div class="empty">No payments recorded yet</div>';
+
+    const instalmentList = installments.length
+      ? installments.map((i) => {
+          const late = i.status === 'overdue' || (i.status === 'pending' && i.due_date < today);
+          const color = i.status === 'paid' || i.status === 'waived'
+            ? 'var(--ok)' : late ? 'var(--crit)' : 'var(--warn)';
+          return '<div class="bd-row"><div class="lbl">' +
+            '<span class="swatch" style="background:' + color + '"></span>' +
+            esc(String(i.label || 'Instalment').replace(/_/g, ' ')) +
+            '<span class="faint mono" style="font-size:11px">due ' + shortDate(i.due_date) + '</span></div>' +
+            '<div class="amt">' + inr(i.amount) + ' <span class="tag sev-' + esc(feeSev(i.status)) + '">' +
+            esc(late ? 'overdue' : i.status) + '</span></div></div>';
+        }).join('')
+      : '<div class="empty">No instalment plan on file</div>';
+
+    const feeDetail = '<div class="grid two" style="margin-bottom:16px">' +
+      '<div class="card"><div class="card-head"><div class="card-title">Invoices</div>' +
+        '<span class="tag num">' + invoices.length + '</span></div>' + invoiceTable + '</div>' +
+      '<div class="card"><div class="card-head"><div class="card-title">Payments</div>' +
+        '<span class="tag num">' + payments.length + '</span></div>' + paymentTable + '</div>' +
+      '</div>' +
+      '<div class="card"><div class="card-head"><div class="card-title">Instalment Plan</div>' +
+        '<span class="tag num">' + installments.filter((i) => i.status === 'paid').length + '/' + installments.length + ' paid</span></div>' +
+        instalmentList + '</div>';
+
+    const tabs = '<div class="toolbar" style="margin-bottom:18px">' +
+      '<div class="seg" role="tablist">' +
+        ['summary', 'academics', 'fees'].map((t) =>
+          '<button type="button" role="tab" data-stab="' + t + '" aria-selected="' + (state.tab === t) + '">' +
+          t.charAt(0).toUpperCase() + t.slice(1) + '</button>').join('') +
+      '</div></div>';
+
+    if (state.tab === 'academics') return tabs + academics;
+    if (state.tab === 'fees') return tabs + feeDetail;
+    return tabs + stats + statusBanner + progress + '<div class="grid two" style="margin-bottom:16px">' +
+      profile + attendance + '</div>' + academics;
+  }
+
+  /* ================= routing ================= */
+
+  async function route() {
+    if (!state.role) return;
+    setPressed(state.role);
+    view.innerHTML = skeletonGrid(4);
+
+    try {
+      if (state.role === 'ACCOUNTANT') {
+        const bar = '<div class="toolbar" style="margin-bottom:18px">' +
+          '<div class="seg" role="tablist">' +
+            ['overview', 'ledger', 'alerts'].map((t) =>
+              '<button type="button" role="tab" data-tab="' + t + '" aria-selected="' + (state.tab === t) + '">' +
+              t.charAt(0).toUpperCase() + t.slice(1) + '</button>').join('') +
+          '</div>' +
+          '<div class="spacer"></div>' +
+          (state.tab === 'ledger' ? '<span class="faint" style="font-size:12px">Receipts, ageing, and CSV export</span>'
+            : state.tab === 'alerts' ? '<span class="faint" style="font-size:12px">Derived alerts across your account</span>'
+              : '<span class="faint" style="font-size:12px">Collection health and AI risk</span>') +
+          '</div>';
+
+        if (state.tab === 'ledger') {
+          view.innerHTML = bar + ledgerView(await api('/api/accountant/ledger?' + ledgerQuery()));
+          wireTabs();
+          wireLedger();
+          return;
+        }
+        if (state.tab === 'alerts') {
+          view.innerHTML = bar + alertsView(await api('/api/notifications?limit=50'));
+          wireTabs();
+          wireAlerts();
+          return;
+        }
+        view.innerHTML = bar + accountantView(await api('/api/accountant/overview'));
+        wireTabs();
+        return;
+      }
+
+      if (state.role === 'TEACHER') {
+        const grade = state.grade === '' || state.grade === undefined ? '' : '=' + encodeURIComponent(state.grade);
+        const d = await api('/api/teacher/students?grade' + grade);
+        const a = state.attendance;
+        a.today = a.today || isoDay(new Date());
+        if (state.ttab === 'attendance') {
+          const sheet = await api('/api/teacher/attendance?grade' + grade + '&day=' + encodeURIComponent(a.day || a.today));
+          a.day = sheet.day;
+          holdSheet(sheet);
+          d.students = sheet.students;
+          d.today = sheet.today;
+        }
+
+        const tabs = '' +
+          '<div class="toolbar"><div class="seg" role="tablist">' +
+            [['roster', 'Roster'], ['attendance', 'Register'], ['insights', 'Insights']].map(([k, label]) =>
+              '<button type="button" role="tab" data-ttab="' + k + '" aria-selected="' + (state.ttab === k) + '">' +
+              label + '</button>').join('') +
+          '</div><div class="spacer"></div>' +
+          '<span class="faint hide-sm" style="font-size:12.5px">' + ({
+            roster: 'Click a student to run AI diagnosis',
+            attendance: 'Click a student to mark them — nothing saves until you press Save',
+            insights: 'Class diagnosis, subjects, and the attendance split',
+          }[state.ttab] || '') + '</span></div>';
+
+        const scope = '<label class="field">Grade' +
+          '<select id="gradeSel"><option value="">All grades</option>' +
+            d.grades.map((g) => '<option value="' + g + '"' +
+              (String(g) === String(state.grade) ? ' selected' : '') + '>Grade ' + g + '</option>').join('') +
+          '</select></label>';
+
+        view.innerHTML = tabs + scope + teacherView(d);
+        wireTeacher();
+        return;
+      }
+
+      const d = await api('/api/student/me');
+      if (!['summary', 'academics', 'fees'].includes(state.tab)) state.tab = 'summary';
+      view.innerHTML = studentView(d);
+      $$('#view [data-stab]').forEach((b) => b.addEventListener('click', () => {
+        state.tab = b.dataset.stab;
+        route();
+      }));
+    } catch (err) {
+      view.innerHTML = emptyState(err.message);
+      toast('Request failed', err.message);
+    }
+  }
+
+  function wireTabs() {
+    $$('#view [data-tab]').forEach((b) => b.addEventListener('click', () => {
+      if (state.tab === b.dataset.tab) return;
+      state.tab = b.dataset.tab;
+      state.selectedStudent = null;
+      route();
+    }));
+  }
+
+  function wireTeacher() {
+    const sel = $('#gradeSel');
+    if (sel) {
+      sel.addEventListener('change', () => {
+        state.grade = sel.value === '' ? '' : Number(sel.value);
+        state.selectedStudent = null;
+        resetRegister();
+        route();
+      });
+    }
+    $$('#view [data-ttab]').forEach((b) => b.addEventListener('click', () => {
+      if (state.ttab === b.dataset.ttab) return;
+      if (state.ttab === 'attendance' && unsavedCount()) {
+        if (!confirm('Discard unsaved register marks?')) return;
+        resetRegister();
+      }
+      state.ttab = b.dataset.ttab;
+      state.selectedStudent = null;
+      route();
+    }));
+    $$('#view tr.clickable').forEach((tr) => {
+      tr.addEventListener('click', () => selectStudent(Number(tr.dataset.student)));
+    });
+    if (state.ttab === 'attendance') wireRollCall();
+  }
+
+  /* ---- register state helpers ---- */
+
+  /**
+   * How many rows differ from what is on the server. Compared, not counted —
+   * a bulk "everyone present" writes a draft key for all fifty students, but
+   * only the ones that actually changed should block a tab change.
+   */
+  function unsavedCount() {
+    const a = state.attendance;
+    return Object.keys(a.draft)
+      .filter((id) => a.draft[id] !== (a.saved[id] || '')).length;
+  }
+
+  /** Throw away unflipped marks — used on tab/grade/day change. */
+  function resetRegister() {
+    state.attendance.draft = {};
+    state.attendance.saved = {};
+  }
+
+  /** Cache the sheet the register was rendered from, for local repaints. */
+  function holdSheet(d) {
+    const a = state.attendance;
+    const saved = {};
+    for (const st of d.students || []) saved[st.id] = st.status || '';
+    a.saved = saved;
+    a.today = d.today || a.today;
+    a.sheet = d;
+  }
+
+  function wireRollCall() {
+    const a = state.attendance;
+    if (!a.sheet) return;
+
+    const goDay = (day) => {
+      if (unsavedCount() && !confirm('Discard unsaved register marks?')) return;
+      resetRegister();
+      a.day = day;
+      route();
+    };
+
+    const dateInput = $('#rcDay');
+    if (dateInput) dateInput.addEventListener('change', () => goDay(dateInput.value));
+    const prev = $('#rcPrev');
+    if (prev) prev.addEventListener('click', () => goDay(shiftDay(a.sheet.day, -1)));
+    const next = $('#rcNext');
+    if (next) next.addEventListener('click', () => goDay(shiftDay(a.sheet.day, 1)));
+
+    $$('#view .tally').forEach((t) => t.addEventListener('click', () => {
+      const want = t.dataset.bulk || '';
+      const sheet = a.sheet;
+      if (!sheet) return;
+      for (const st of sheet.students) a.draft[st.id] = want;
+      refreshRollCall(sheet);
+    }));
+
+    $$('#view .rcard').forEach((card) => {
+      const id = card.dataset.rc;
+      card.addEventListener('click', () => {
+        a.draft[id] = nextStatus(a.draft[id] !== undefined ? a.draft[id] : (a.saved[id] || ''));
+        refreshRollCall(a.sheet);
+        refocusCard(id);
+      });
+      card.addEventListener('keydown', (e) => {
+        const k = e.key.toLowerCase();
+        if (k === 'arrowright' || k === 'arrowdown') { e.preventDefault(); moveFocus(card, 1); return; }
+        if (k === 'arrowleft' || k === 'arrowup') { e.preventDefault(); moveFocus(card, -1); return; }
+        if (k === '0' || k === 'backspace' || k === 'delete') {
+          e.preventDefault();
+          a.draft[id] = '';
+          refreshRollCall(a.sheet);
+          refocusCard(id);
+          return;
+        }
+        const next = statusForKey(k);
+        if (!next) return;
+        e.preventDefault();
+        a.draft[id] = a.draft[id] === next ? '' : next;
+        refreshRollCall(a.sheet);
+        refocusCard(id);
+      });
+    });
+
+    const undo = $('#rcUndo');
+    if (undo) undo.addEventListener('click', () => {
+      resetRegister();
+      refreshRollCall(a.sheet);
+    });
+
+    const save = $('#rcSave');
+    if (save) save.addEventListener('click', () => saveRegister());
+  }
+
+  const refocusCard = (id) => {
+    const el = document.querySelector('#view .rcard[data-rc="' + id + '"]');
+    if (el) el.focus();
+  };
+
+  const moveFocus = (card, delta) => {
+    const cards = $$('#view .rcard');
+    const i = cards.indexOf(card);
+    const next = cards[Math.min(cards.length - 1, Math.max(0, i + delta))];
+    if (next) next.focus();
+  };
+
+  /** File every changed row in one request, then re-sync from the response. */
+  async function saveRegister() {
+    const a = state.attendance;
+    const btn = $('#rcSave');
+    if (!btn || a.busy) return;
+
+    const changed = Object.keys(a.draft)
+      .filter((id) => a.draft[id] !== (a.saved[id] || ''))
+      .map((id) => ({ studentId: Number(id), status: a.draft[id] || null }));
+    if (!changed.length) return;
+
+    a.busy = true;
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const res = await api('/api/teacher/attendance', {
+        method: 'POST',
+        body: JSON.stringify({
+          day: a.sheet.day,
+          grade: state.grade === '' ? null : Number(state.grade),
+          entries: changed,
+        }),
+      });
+      const sheet = res.sheet || a.sheet;
+      holdSheet(sheet);
+      resetRegister();
+      a.busy = false;
+      toast('Register saved', res.marked + ' mark' + (res.marked === 1 ? '' : 's') +
+        ' filed for ' + prettyDay(res.day) + '.');
+      // The roster's headline percentages moved, so pull fresh numbers in.
+      await route();
+    } catch (err) {
+      a.busy = false;
+      toast('Could not save register', err.message);
+      const b = $('#rcSave');
+      if (b) { b.disabled = false; b.textContent = 'Save register'; }
+    }
+  }
+
+  async function selectStudent(id) {
+    state.selectedStudent = id;
+    $$('#view tr.clickable').forEach((tr) => {
+      tr.classList.toggle('active', Number(tr.dataset.student) === id);
+    });
+
+    let host = $('#planHost');
+    if (!host) {
+      host = document.createElement('div');
+      host.id = 'planHost';
+      view.appendChild(host);
+    }
+    host.innerHTML = '<div class="card skeleton" style="height:190px;margin-top:16px"></div>';
+
+    try {
+      host.innerHTML = planView(await api('/api/teacher/diagnose?studentId=' + encodeURIComponent(id)));
+    } catch (err) {
+      host.innerHTML = '<div class="card" style="margin-top:16px">' +
+        '<div class="card-title" style="margin-bottom:8px">Diagnosis unavailable</div>' +
+        '<p class="muted" style="font-size:13.5px">' + esc(err.message) + '</p></div>';
+    }
+  }
+
+  /* ================= boot ================= */
+
+  async function boot() {
+    try {
+      const h = await api('/api/health');
+      const live = h.ai.configured;
+      const plan = h.ai.plan?.fast || [];
+      $('#aiChip').className = 'ai-chip ' + (live ? 'live' : 'offline');
+      $('#aiText').textContent = live
+        ? h.ai.providers.map((p) => p.toUpperCase()).join(' + ') + ' · '
+          + plan.slice(0, 3).map((c) => c.model).join(' → ')
+        : 'offline — set an API key';
+      $('#aiChip').title = live
+        ? 'Providers: ' + h.ai.providers.join(', ') + '\nEndpoint: ' + h.ai.endpoint
+          + '\nFast: ' + plan.map((c) => `${c.model} [${c.provider}]`).join(', ')
+        : 'No GEMINI_API_KEY or OPENCODE_ZEN_API_KEY found. Serving deterministic local analysis.';
+    } catch {
+      $('#aiText').textContent = 'server unreachable';
+      $('#aiChip').className = 'ai-chip offline';
+    }
+
+    // A live cookie session wins; otherwise auto sign-in so the page is never
+    // a dead end. Either way the reload keeps you signed in.
+    if (await adoptSession()) {
+      await route();
+      return;
+    }
+    await login('ACCOUNTANT');
+  }
+
+  $$('#switcher button').forEach((btn) => {
+    btn.addEventListener('click', () => login(btn.dataset.role));
+  });
+
+  $('#bell').addEventListener('click', (e) => {
+    e.stopPropagation();
+    const panel = $('#bellPanel');
+    if (panel.hidden) openBell(); else closeBell();
+  });
+
+  $('#bellPanel').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const markAll = e.target.closest('#markAll');
+    const sweep = e.target.closest('#genAlerts');
+    const item = e.target.closest('.nitem');
+
+    if (markAll) {
+      markAll.disabled = true;
+      try {
+        await api('/api/notifications/read-all', { method: 'POST' });
+        state.unread = 0;
+        renderBadge();
+        await openBell();
+      } catch (err) {
+        toast('Could not clear alerts', err.message);
+      }
+      return;
+    }
+
+    if (sweep) {
+      sweep.disabled = true;
+      sweep.textContent = 'Sweeping…';
+      try {
+        const r = await api('/api/notifications/generate', { method: 'POST' });
+        toast('Alert sweep', r.created
+          ? (r.created + ' new alert' + (r.created === 1 ? '' : 's'))
+          : 'Already up to date — nothing new to raise.');
+        await openBell();
+        pollUnread();
+      } catch (err) {
+        toast('Sweep failed', err.message);
+        sweep.disabled = false;
+        sweep.textContent = 'Run alert sweep';
+      }
+      return;
+    }
+
+    if (item) {
+      const link = item.dataset.link;
+      await markRead(item.dataset.notif);
+      if (link === 'ledger') { closeBell(); state.tab = 'ledger'; route(); return; }
+      if (link === 'attendance' || link === 'academics') { closeBell(); }
+      if (!link) openBell();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#bellHost')) closeBell();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeBell();
+  });
+
+  $('#signOut').addEventListener('click', () => signOut());
+
+  // Keep the badge honest while the tab stays open.
+  setInterval(pollUnread, 45000);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target && e.target.matches('input, select, textarea')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const map = { 1: 'ACCOUNTANT', 2: 'TEACHER', 3: 'STUDENT' };
+    const role = map[e.key];
+    if (role && !e.repeat) {
+      e.preventDefault();
+      login(role);
+    }
+  });
+
+  document.addEventListener('cf:signed-out', () => { boot(); });
+
+  boot();
+})();
+</script>
+<script src="/settings.js"></script>
+</body>
+</html>

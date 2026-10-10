@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Secrets — never commit
+.env
+.token-secret
+*.pem
+*.key
+
+# Runtime data (re-seeded automatically on first boot)
+campus.db
+campus.db-shm
+campus.db-wal
+*.db-journal
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
